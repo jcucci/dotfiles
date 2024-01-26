@@ -23,10 +23,27 @@ bindkey -v
 source ~/powerlevel10k/powerlevel10k.zsh-theme
 
 # To customize prompt, run `p10k configure` or edit ~/.config/.zsh/.p10k.zsh.
-[[ ! -f ~/.config/.zsh/.p10k.zsh ]] || source ~/.config/.zsh/.p10k.zsh
+[[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 
-source ~/.config/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-source ~/.config/.zsh/fzf-tab/fzf-tab.plugin.zsh
+source ~/.config/zsh/fzf-tab/fzf-tab.plugin.zsh
+
+# Aliases
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias z='zoxide'
+alias la='exa -la'
+alias ls='exa'
+alias md='mkdir'
+alias cp="cp -i"
+alias mv='mv -i'
+alias rm='rm -i'
+alias df='df -h'     # human-readable sizes  
+alias free='free -m' # show sizes in MB
+alias cdconf='cd ~/.config'
+alias cdnvim='cd ~/.config/nvim'
+alias cdca='cd ~/projects/sharp/snowdrop-charge-assemblies-be/'

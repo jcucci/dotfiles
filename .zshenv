@@ -1,1 +1,1 @@
-ZDOTDIR=/home/jcucci/.config/.zsh
+ZDOTDIR=/home/jcucci/.config/zsh
