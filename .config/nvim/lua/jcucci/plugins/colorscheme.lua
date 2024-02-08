@@ -30,9 +30,24 @@ return {
                 treesitter = true,
                 treesitter_context = true,
                 telescope = { enabled = true },
-                which_key = true
+                which_key = true,
+                native_lsp = {
+                    enabled = true,
+                    virtual_text = {
+                        errors = {},
+                        hints = {},
+                        warnings = {},
+                        information = {},
+                    },
+                    underlines = {
+                        errors = { "undercurl" },
+                        hints = { "undercurl" },
+                        warnings = { "undercurl" },
+                        information = { "undercurl" },
+                    }
+                }
             },
-            no_italic = true
+            no_italic = true,
         })
 
         vim.cmd([[colorscheme catppuccin]])

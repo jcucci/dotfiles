@@ -41,9 +41,10 @@ alias ls='exa'
 alias md='mkdir'
 alias cp="cp -i"
 alias mv='mv -i'
-alias rm='rm -i'
 alias df='df -h'     # human-readable sizes  
 alias free='free -m' # show sizes in MB
 alias cdconf='cd ~/.config'
 alias cdnvim='cd ~/.config/nvim'
+
 alias cdca='cd ~/projects/sharp/snowdrop-charge-assemblies-be/'
+alias cdci='cd ~/projects/sharp/snowdrop-charge-interventions-be/'

@@ -64,13 +64,13 @@ return {
                 ["<C-f>"] = cmp.mapping.scroll_docs(4),
                 ["<C-Space>"] = cmp.mapping.complete(), -- show completion suggestions
                 ["<C-esc>"] = cmp.mapping.abort(), -- close completion window
-                -- ["<CR>"] = function(fallback)
-                --     if cmp.visible() == false or cmp.get_selected_entry() == nil then
-                --         fallback()
-                --     else
-                --         cmp.mapping.confirm({ select = true })
-                --     end
-                -- end,
+                ["<CR>"] = function(fallback)
+                    if cmp.visible() and cmp.get_selected_entry() then
+                        cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace, select = false })
+                    else
+                        fallback()
+                    end
+                end,
                 ["<Tab>"] = cmp.mapping.confirm({ select = true }),
             }),
             -- sources for autocompletion
@@ -81,6 +81,9 @@ return {
                 { name = "buffer" }, -- text within current buffer
                 { name = "path" }, -- file system paths
             }),
+            experimental  = {
+                ghost_text = true
+            },
             -- configure lspkind for vs-code like pictograms in completion menu
             formatting = {
                 fields = { "kind", "abbr" },

@@ -36,9 +36,9 @@ return {
                 enable = true,
                 keymaps = {
                     init_selection = "<leader>ts",
-                    node_incremental = "<leader>ta",
+                    node_incremental = "<leader>tn",
                     scope_incremental = false,
-                    node_decremental = "<leader>td",
+                    node_decremental = "<leader>tp",
                 },
             },
         })

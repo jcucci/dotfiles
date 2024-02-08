@@ -4,6 +4,7 @@ return {
     dependencies = {
         "hrsh7th/cmp-nvim-lsp",
         { "antosha417/nvim-lsp-file-operations", config = true },
+        "jmederosalvarado/roslyn.nvim",
     },
     config = function()
         local lspconfig = require("lspconfig")
@@ -11,12 +12,12 @@ return {
         local keymap = vim.keymap -- for conciseness
         local opts = { noremap = true, silent = true }
 
-        local on_attach = function(client, bufnr)
+        local on_attach = function(_, bufnr)
             opts.buffer = bufnr
 
             -- set keybinds
             opts.desc = "Show LSP references"
-            keymap.set("n", "gR", "<cmd>Telescope lsp_references theme=ivy<CR>", opts) -- show definition, referenceslsp
+            keymap.set("n", "gr", "<cmd>Telescope lsp_references theme=ivy<CR>", opts) -- show definition, referenceslsp
 
             opts.desc = "Go to declaration"
             keymap.set("n", "gD", vim.lsp.buf.declaration, opts) -- go to declaration
@@ -53,6 +54,12 @@ return {
 
             opts.desc = "Restart LSP"
             keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
+
+            opts.desc = "Format document"
+            keymap.set("n", "<leader>fm",
+                function()
+                    vim.lsp.buf.format { async = true }
+                end, opts)
         end
 
         local capabilities = cmp_nvim_lsp.default_capabilities()
@@ -81,23 +88,31 @@ return {
             on_attach = on_attach,
         })
 
-        -- configure c# server
-        --lspconfig["csharp_ls"].setup({
-        --  capabilities = capabilities,
-        --  on_attach = on_attach,
-        --})
+        -- configure Roslyn server
+        -- roslyn.setup({
+        --     dotnet_cmd = "dotnet",
+        --     roslyn_version = "4.9.0-3.23604.10",
+        --     capabilities = capabilities,
+        --     on_attach = on_attach
+        -- })
 
-        lspconfig["omnisharp"].setup({
-            capabilities = capabilities,
-            on_attach = on_attach,
-            cmd = { "dotnet", vim.fn.stdpath "data" .. "/mason/packages/omnisharp/libexec/OmniSharp.dll" },
-            enable_import_completion = true,
-            organize_imports_on_format = true,
-            enable_roslyn_analyzers = false,
-            root_dir = function ()
-                return vim.loop.cwd() -- current working directory
-            end,
+        -- configure c# server
+        lspconfig["csharp_ls"].setup({
+         capabilities = capabilities,
+         on_attach = on_attach,
         })
+
+        -- lspconfig["omnisharp"].setup({
+        --     capabilities = capabilities,
+        --     on_attach = on_attach,
+        --     cmd = { "dotnet", vim.fn.stdpath "data" .. "/mason/packages/omnisharp/libexec/OmniSharp.dll" },
+        --     enable_import_completion = true,
+        --     organize_imports_on_format = true,
+        --     enable_roslyn_analyzers = false,
+        --     root_dir = function ()
+        --         return vim.loop.cwd() -- current working directory
+        --     end,
+        -- })
 
         -- configure rust server
         lspconfig["rust_analyzer"].setup({

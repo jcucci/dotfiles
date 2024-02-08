@@ -25,7 +25,7 @@ opt.signcolumn = "yes"
 
 -- behavior
 opt.backspace = "indent,eol,start"
-opt.clipboard:append("unnamedplus")
+opt.clipboard = "unnamedplus"
 
 -- splits
 opt.splitright = true
