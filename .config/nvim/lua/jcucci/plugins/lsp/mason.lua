@@ -23,6 +23,7 @@ return {
         "tsserver",
         "html",
         "cssls",
+        "csharp_ls",
         "rust_analyzer",
         "zls",
       },

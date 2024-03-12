@@ -1,0 +1,46 @@
+* {
+	background-image: none;
+}
+window {
+	background-color: rgba(0, 0, 0, 0.3);
+}
+button {
+    color: #ffffff;
+	background-color: #1E1E1E;
+	border-style: solid;
+	border-width: 1px;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: 25%;
+    margin: 10px;
+    border-radius: 10px;
+}
+
+button:focus, button:active, button:hover {
+	background-color: #3e3e3e;
+	outline-style: none;
+}
+
+#lock {
+    background-image: image(url("/home/jcucci/.config/wlogout/icons/lock.png"), url("/home/jcucci/.config/wlogout/icons/lock.png"));
+}
+
+#logout {
+    background-image: image(url("/home/jcucci/.config/wlogout/icons/logout.png"), url("/home/jcucci/.config/wlogout/icons/logout.png"));
+}
+
+#suspend {
+    background-image: image(url("/home/jcucci/.config/wlogout/icons/suspend.png"), url("/home/jcucci/.config/wlogout/icons/suspend.png"));
+}
+
+#hibernate {
+    background-image: image(url("/home/jcucci/.config/wlogout/icons/hibernate.png"), url("/home/jcucci/.config/wlogout/icons/hibernate.png"));
+}
+
+#shutdown {
+    background-image: image(url("/home/jcucci/.config/wlogout/icons/shutdown.png"), url("/home/jcucci/.config/wlogout/icons/shutdown.png"));
+}
+
+#reboot {
+    background-image: image(url("/home/jcucci/.config/wlogout/icons/reboot.png"), url("/home/jcucci/.config/wlogout/icons/reboot.png"));
+}

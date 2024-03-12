@@ -8,9 +8,9 @@ keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })
 keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" })
 
 keymap.set("n", "<leader>bo", "<cmd>BufferLineCloseOthers<CR>", { desc = "Close all other buffers" })
-keymap.set("n", "<S-Tab>", "<cmd>BufferLineCycleNext<CR>", { desc = "Go to next buffer" })
+keymap.set("n", "<C-Tab>", "<cmd>BufferLineCycleNext<CR>", { desc = "Go to next buffer" })
 keymap.set("n", "<C-S-Tab>", "<cmd>BufferLineCyclePrev<CR>", { desc = "Go to previous buffer" })
-keymap.set("n", "<leader>bx", "<cmd>BufferLinePickClose<CR>", { desc = "Pick the buffer to close" })
+keymap.set("n", "<C-F4>", "<cmd>BufferLinePickClose<CR>", { desc = "Pick the buffer to close" })
 
 keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Move a lot down" })
 keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Move a lot up" })

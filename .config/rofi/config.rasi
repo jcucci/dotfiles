@@ -1,0 +1,112 @@
+configuration{
+  modi: "drun";
+  icon-theme: "BeautySolar";
+  show-icons: true;
+  terminal: "kitty";
+  case-insensitive: true;
+  drun-display-format: "{icon} {name}";
+  drun-show-actions: true;
+  location: 0;
+  disable-history: false;
+  hide-scrollbar: true;
+  sidebar-mode: false;
+
+  drun {
+    display-name: "";
+  }
+
+  run {
+    display-name: "";
+  }
+
+  window {
+    display-name: "";
+  }
+}
+
+* {
+    border-radius: 3px;
+    border: none;
+}
+
+window {
+    font-size: 32px;
+    font-family: "Roboto Mono Medium";
+    background-color: rgba(50, 50, 50, 0.9);
+    width: 600px;
+    text-color: #dddddd;
+    border-radius: 10px;
+    border-color: #111111;
+    location: north;
+    anchor: north;
+    y-offset: 500px;
+    border: 1;
+}
+
+listview {
+    dynamic: true;
+    fixed-height: false;
+    require-input: true;
+    scrollbar: false;
+    border: 0;
+}
+
+mainbox {
+    children: [inputbar, listview];
+}
+
+inputbar {
+    background-color: rgba(50, 50, 50, 0.5);
+    color: white;
+    padding: 0.5em;
+    children: [prompt, entry];
+}
+
+inputbar {
+    color: #dddddd;
+}
+
+prompt {
+    margin: 0.20em;
+    padding: 0.25em;
+    color: #dddddd;
+}
+
+entry {
+    margin: 0.1em;
+    padding: 0.25em;
+    color: #dddddd;
+}
+
+element {
+    children: [element-icon, element-text];
+}
+
+element normal.normal {
+    background-color: rgba(50, 50, 50, 0.5);
+    text-color:       #dddddd;
+}
+
+element selected.normal {
+    background-color: var(selected-normal-background);
+    text-color:       var(selected-normal-foreground);
+}
+
+element alternate.normal {
+    background-color: rgba(50, 50, 50, 0.5);
+    text-color:       #dddddd;
+}
+
+element-icon {
+    padding: 10px 10px;
+    size: 30px;
+}
+
+element-text {
+    margin: 5px 5px;
+    padding: 10px 0px;
+}
+
+element-text selected {
+    text-color: #dddddd;
+}
