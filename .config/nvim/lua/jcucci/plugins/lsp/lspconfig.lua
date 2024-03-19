@@ -9,7 +9,6 @@ return {
     config = function()
         local lspconfig = require("lspconfig")
         local cmp_nvim_lsp = require("cmp_nvim_lsp")
-        local roslyn = require("roslyn")
         local keymap = vim.keymap -- for conciseness
         local opts = { noremap = true, silent = true }
 
@@ -98,22 +97,22 @@ return {
         -- })
 
         -- configure c# server
-        lspconfig["csharp_ls"].setup({
-            capabilities = capabilities,
-            on_attach = on_attach,
-        })
-
-        -- lspconfig["omnisharp"].setup({
+        -- lspconfig["csharp_ls"].setup({
         --     capabilities = capabilities,
         --     on_attach = on_attach,
-        --     cmd = { "dotnet", vim.fn.stdpath "data" .. "/mason/packages/omnisharp/libexec/OmniSharp.dll" },
-        --     enable_import_completion = true,
-        --     organize_imports_on_format = true,
-        --     enable_roslyn_analyzers = false,
-        --     root_dir = function ()
-        --         return vim.loop.cwd() -- current working directory
-        --     end,
         -- })
+        --
+        lspconfig["omnisharp"].setup({
+            capabilities = capabilities,
+            on_attach = on_attach,
+            cmd = { "dotnet", vim.fn.stdpath "data" .. "/mason/packages/omnisharp/libexec/OmniSharp.dll" },
+            enable_import_completion = true,
+            organize_imports_on_format = true,
+            enable_roslyn_analyzers = false,
+            root_dir = function ()
+                return vim.loop.cwd() -- current working directory
+            end,
+        })
 
         -- configure rust server
         lspconfig["rust_analyzer"].setup({

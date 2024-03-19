@@ -1,7 +1,7 @@
 return {
     "akinsho/bufferline.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
-    after = "catppuccin",
+  --  after = "catppuccin",
     version = "*",
     -- config = function()
     --     local bufferline = require("bufferline")
@@ -27,7 +27,7 @@ return {
                 }
             },
             show_close_icon = false,
-            separator_style = "slope",
+      --      separator_style = "slope",
         },
     },
 }
