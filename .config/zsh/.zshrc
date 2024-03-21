@@ -29,7 +29,8 @@ alias gch='git checkout'
 alias gsh='git stash'
 
 # Environment variables
-export VSS_NUGET_EXTERNAL_FEED_ENDPOINTS='{"endpointCredentials": [{"endpoint":"https://sharpfm.pkgs.visualstudio.com/_packaging/sharpfm/nuget/v3/index.json", "username":"jcucci@unlimitedsystems.com", "password":"[PAT]"}]'
+export NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED='true'
+export VSS_NUGET_EXTERNAL_FEED_ENDPOINTS='{"endpointCredentials": [{"endpoint":"https://sharpfm.pkgs.visualstudio.com/_packaging/sharpfm/nuget/v3/index.json", "username":"jcucci@unlimitedsystems.com", "password":"io3ylabebjfqdqr5rss2jqmvv3pl7ws2owmu5skfbjfy5jtnevna"}]}'
 
 # External initializations
 eval "$(zoxide init zsh)"
