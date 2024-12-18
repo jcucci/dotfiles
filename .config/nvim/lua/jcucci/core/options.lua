@@ -36,3 +36,5 @@ opt.swapfile = false
 
 -- Lua initialization file
 --vim.g.nightflyTransparent = true
+
+--vim.lsp.set_log_level 'debug'

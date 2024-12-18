@@ -20,7 +20,6 @@ return {
 
     mason_lspconfig.setup({
       ensure_installed = {
-        "tsserver",
         "html",
         "cssls",
         "rust_analyzer",

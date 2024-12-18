@@ -11,17 +11,14 @@ return {
 
         dap.adapters.coreclr = {
             type = "executable",
-            command = "/usr/bin/netcoredbg",
-            args = { "--interpreter=vscode" }
+            command = "/usr/local/netcoredbg",
+            args = { "--interpreter=vscode", "--engineLogging='/home/jcucci/documents/debug.log'", "--log=file" },
+            options = {
+                detached = false
+            }
         }
 
-        dap.adapters.netcoredbg = {
-            type = "executable",
-            command =  "/usr/bin/netcoredbg",
-            args = { "--interpreter=vscode" }
-        }
-
-        dap.configuration.cs = {
+        dap.configurations.cs = {
             {
                 type = "coreclr",
                 name = "launch - netcoredbg",
@@ -29,7 +26,7 @@ return {
                 program = function()
                     return vim.fn.input("Path to DLL", vim.fn.getcwd(), "File")
                 end
-            }
+            },
         }
     end
 }
