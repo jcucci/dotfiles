@@ -52,7 +52,7 @@ l       --     "<cmd>Trouble lsp_references toggle focus=true win.size=.25 previ
             --     size = 0.5,
             -- },
             filter = {
-                severity = vim.diagnostic.severity.ERROR
+                severity = { vim.diagnostic.severity.WARN, vim.diagnostic.severity.ERROR }
             }
         }
 
@@ -60,6 +60,12 @@ l       --     "<cmd>Trouble lsp_references toggle focus=true win.size=.25 previ
             local diagnosticOpts = vim.deepcopy(diagOpts)
             diagnosticOpts.mode = "diagnostics"
             trouble.toggle(diagnosticOpts)
+        end
+
+        local showQuicklist = function()
+            local quickfixOpts = vim.deepcopy(diagOpts)
+            quickfixOpts.mode = "quickfix"
+            trouble.toggle(quickfixOpts)
         end
 
         local gotoReferences = function()
@@ -80,7 +86,8 @@ l       --     "<cmd>Trouble lsp_references toggle focus=true win.size=.25 previ
             trouble.open(implementationsOpts)
         end
 
-        vim.keymap.set("n", "<leader>da", showDiagnostics, { desc = "Show Diagnostics" } ) 
+        vim.keymap.set("n", "<leader>qa", showDiagnostics, { desc = "Show Diagnostics" } ) 
+        vim.keymap.set("n", "<leader>qq", showQuicklist, { desc = "Show Quick Fix List" } ) 
         vim.keymap.set("n", "gr", gotoReferences, { desc = "Go to references" } ) 
         vim.keymap.set("n", "gd", gotoDefinitions, { desc = "Go to definitions" } ) 
         vim.keymap.set("n", "gi", gotoImplementations, { desc = "Go to implementations" } ) 

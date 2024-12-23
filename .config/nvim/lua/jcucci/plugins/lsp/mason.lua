@@ -20,8 +20,8 @@ return {
 
     mason_lspconfig.setup({
       ensure_installed = {
-        "html",
         "cssls",
+        "html",
         "rust_analyzer",
         "zls",
       },

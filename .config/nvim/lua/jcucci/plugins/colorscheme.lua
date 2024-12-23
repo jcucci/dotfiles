@@ -3,9 +3,9 @@ return {
     name = "catppuccin",
     priority = 1000,
     config = function()
-         local cat = require("catppuccin")
-    
-         cat.setup({
+        local cat = require("catppuccin")
+
+        cat.setup({
             flavour = "mocha",
             background = { -- :h background
                 light = "latte",

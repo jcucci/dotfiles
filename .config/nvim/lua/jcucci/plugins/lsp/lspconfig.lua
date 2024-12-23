@@ -4,23 +4,26 @@ return {
     dependencies = {
         "hrsh7th/cmp-nvim-lsp",
         "seblj/roslyn.nvim",
-        { "antosha417/nvim-lsp-file-operations", config = true }
+        { "antosha417/nvim-lsp-file-operations", config = true },
+        "folke/trouble.nvim"
     },
     config = function()
         local roslyn = require("roslyn")
         local lspconfig = require("lspconfig")
         local cmp_nvim_lsp = require("cmp_nvim_lsp")
+        local trouble = require("trouble")
+        local builder = require("jcucci.core.makes.builder")
         local keymap = vim.keymap -- for conciseness
         local opts = { noremap = true, silent = true }
 
         local on_attach = function(client, bufnr)
 
+            builder.register_compiler()
+
             opts.buffer = bufnr
 
-            if vim.g.roslyn_nvim_selected_solution then
-                local message = string.format("Dotnet Solution attached %s", vim.g.roslyn_nvim_selected_solution)
-                vim.notify(message, vim.log.levels.DEBUG)
-            end
+            opts.desc = "Compile workspace"
+            keymap.set({ "n", "v" }, "<leader>m", builder.compile_project, opts)
 
             opts.desc = "See available code actions"
             keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts) -- see available code actions, in visual mode will apply to selection
@@ -110,9 +113,7 @@ return {
                     }
                 }
             }
-            -- }
         })
-
 
         -- lspconfig["omnisharp"].setup({
         --     capabilities = capabilities,
@@ -120,12 +121,12 @@ return {
         --     cmd = { "dotnet", vim.fn.stdpath "data" .. "/mason/packages/omnisharp/libexec/OmniSharp.dll" },
         --     enable_import_completion = true,
         --     organize_imports_on_format = true,
-        --     enable_roslyn_analyzers = false,
+        --     enable_roslyn_analyzers = true,
         --     root_dir = function ()
         --         return vim.loop.cwd() -- current working directory
         --     end,
         -- })
-
+        --
         -- configure rust server
         lspconfig["rust_analyzer"].setup({
             capabilities = capabilities,
