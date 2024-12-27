@@ -1,10 +1,3 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.config/zsh/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
 if [ ! -d "$ZINIT_HOME" ]; then
@@ -14,7 +7,7 @@ fi
 
 source "${ZINIT_HOME}/zinit.zsh"
 
-zinit ice depth=1; zinit light romkatv/powerlevel10k
+zinit ice depth=1
 zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
 zinit light Aloxaf/fzf-tab
@@ -22,9 +15,6 @@ zinit light Aloxaf/fzf-tab
 autoload -U compinit && compinit
 
 zinit cdreplay -q
-
-# To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
-[[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 
 bindkey -v
 
@@ -51,11 +41,13 @@ export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
 export PATH=$PATH:$DOTNET_ROOT/azure-functions-cli
 export PATH=$PATH:$HOME/apps/hawk-4.1.0
 export NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED="true"
-export VISUAL=code
-export EDITOR="$VISUAL"
+export VISUAL="nvim"
+export EDITOR="nvim"
 export MOZ_ENABLE_WAYLAND=1
 
-source "/home/jcucci/.config/zsh/dev.env"
+if [ -f ~/.config/zsh/dev.env ]; then
+    source ~/.config/zsh/dev.env
+fi
 
 # general
 alias ls='eza --color'
@@ -64,6 +56,7 @@ alias cls='clear'
 alias zsource='source ~/.config/zsh/.zshrc'
 alias ninjasource='source ~/.config/zsh/ninja.env'
 alias wineclip='wl-paste -t text -w xclip -selection clipboard'
+alias cat='bat'
 
 # git
 alias g='git'
@@ -145,4 +138,4 @@ kvset() {
 
 eval "$(fzf --zsh)"
 eval "$(zoxide init zsh)"
-# eval "$(starship init zsh)"
+eval "$(starship init zsh)"
