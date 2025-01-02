@@ -1,3 +1,20 @@
 [user]
 	name = Joe Cucci
-	email = jcucci@unlimitedsystems.com
+	email = jcucci@fastmail.com
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[alias]
+	unstate = reset HEAD --
+	last = log -1 HEAD
+	unstage = reset HEAD --
+[merge]
+    tool = diffview
+[mergetool]
+    prompt = false
+    keepBackup = false
+[mergetool "diffview"]
+    cmd = nvim -n -c "DiffviewOpen" "$MERGE"

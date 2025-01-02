@@ -136,6 +136,11 @@ kvset() {
     az keyvault secret set --vault-name king-ninja-sharp-kv -n $1 --value $2
 }
 
+# system
+untar() {
+    tar -xvzf $1
+}
+
 eval "$(fzf --zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
