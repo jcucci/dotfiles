@@ -37,6 +37,7 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza -la --color $realpath'
 
 export ASPNETCORE_ENVIRONMENT=Development
 export DOTNET_ROOT=/usr/share/dotnet
+export PATH=$PATH:/home/jcucci/.dotnet/tools
 export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
 export PATH=$PATH:$DOTNET_ROOT/azure-functions-cli
 export PATH=$PATH:$HOME/apps/hawk-4.1.0
@@ -111,6 +112,27 @@ kenv() {
     kubectl exec -n $1 -it $2 -- env
 }
 
+function klogs {
+    local namespace=`kubectl get ns | sed 1d | awk '{print $1}' | fzf`
+    local pod=`kubectl get pods -n $namespace | sed 1d | awk '{print $1}' | fzf`
+    echo "Showing logs for $pod"
+
+    kubectl -n $namespace logs -f $pod
+}
+
+function kshell {
+    local namespace=`kubectl get ns | sed 1d | awk '{print $1}' | fzf`
+    local container=`kubectl get container | set 1d | awk '{print $1}' | fzf`
+    local pod=`kubectl get pods -n $namespace | sed 1d | awk '{print $1}' | fzf`
+    echo "Connecting to $pod"
+
+    if [ -z $1 ]
+    then
+        kubectl -n $namespace exec -ti $pod -- bash
+    else
+        kubectl -n $namespace exec -ti $pod -- $1
+    fi
+}
 
 # dotnet
 alias dnpack='dotnet pack -c RELEASE'
@@ -125,6 +147,107 @@ dnbuild() {
 
 dnpush() {
     dotnet nuget push $1 -s "sharpfm" -k az
+}
+
+dnversions() {
+    if [ -z "$1" ] && [ -z "$2" ]; then
+        echo "Usage: dnversions <package_name> [sharpfm] or dnversions [sharpfm] <package_name>"
+        return 1
+    fi
+    
+    local package_name
+    local is_sharpfm=false
+    
+    if [ "$1" = "sharpfm" ]; then
+        is_sharpfm=true
+        package_name="$2"
+    elif [ "$2" = "sharpfm" ]; then
+        is_sharpfm=true
+        package_name="$1"
+    else
+        package_name="$1"
+    fi
+    
+    if [ -z "$package_name" ]; then
+        echo "Error: Package name is required"
+        return 1
+    fi
+    
+    if [ "$is_sharpfm" = true ]; then
+        if [ -z "$AZURE_DEVOPS_PAT" ]; then
+            echo "Error: AZURE_DEVOPS_PAT environment variable not set"
+            return 1
+        fi
+        
+        curl -s \
+        --header "Accept: application/json" \
+        --header "Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64 -w 0)" \
+        "https://sharpfm.pkgs.visualstudio.com/_packaging/64eacba0-4a33-4524-a207-22b9304801fa/nuget/v3/query2/?q=$package_name&prerelease=false" | \
+        jq --arg pkg "$package_name" '.data[] | select(.id | ascii_downcase == ($pkg | ascii_downcase)) | {name: .id, versions: (.versions | sort_by(.) | reverse | .[0:5])}'
+    else
+        curl -s "https://api-v2v3search-0.nuget.org/query?q=$package_name&prerelease=false" | \
+        jq --arg pkg "$package_name" '.data[] | select(.id | ascii_downcase == ($pkg | ascii_downcase)) | {name: .id, versions: (.versions | sort_by(.) | reverse | .[0:5])}'
+    fi
+}
+
+dnsearch() {
+    if [ -z "$1" ]; then
+        echo "Usage: nuget_search <package_name> [sharpfm]"
+        return 1
+    fi
+    
+    if [ "$2" = "sharpfm" ]; then
+        curl -s \
+        --header "Accept: application/json" \
+        --header "Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64 -w 0)" \
+        "https://sharpfm.pkgs.visualstudio.com/_packaging/64eacba0-4a33-4524-a207-22b9304801fa/nuget/v3/query2/?q=$1&prerelease=false" | \
+        jq '[.data[] | {name: .id, version: .version}]'
+    else
+        curl -s "https://api-v2v3search-0.nuget.org/query?q=$1&prerelease=false" | \
+        jq '[.data[] | {name: .id, version: .version}]'
+    fi
+}
+
+dnsearch() {
+    if [ -z "$1" ] && [ -z "$2" ]; then
+        echo "Usage: nuget_search <package_name> [sharpfm] or nuget_search [sharpfm] <package_name>"
+        return 1
+    fi
+    
+    local package_name
+    local is_sharpfm=false
+    
+    if [ "$1" = "sharpfm" ]; then
+        is_sharpfm=true
+        package_name="$2"
+    elif [ "$2" = "sharpfm" ]; then
+        is_sharpfm=true
+        package_name="$1"
+    else
+        package_name="$1"
+    fi
+    
+    if [ -z "$package_name" ]; then
+        echo "Error: Package name is required"
+        return 1
+    fi
+    
+    if [ "$is_sharpfm" = true ]; then
+        if [ -z "$AZURE_DEVOPS_PAT" ]; then
+            echo "Error: AZURE_DEVOPS_PAT environment variable not set"
+            return 1
+        fi
+        
+        curl -s \
+        --header "Accept: application/json" \
+        --header "Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64 -w 0)" \
+        "https://sharpfm.pkgs.visualstudio.com/_packaging/64eacba0-4a33-4524-a207-22b9304801fa/nuget/v3/query2/?q=$package_name&prerelease=true" | \
+        jq '[.data[] | {name: .id, version: .version}]'
+    else
+        # Public NuGet search
+        curl -s "https://api-v2v3search-0.nuget.org/query?q=$package_name&prerelease=false" | \
+        jq '[.data[] | {name: .id, version: .version}]'
+    fi
 }
 
 # azure

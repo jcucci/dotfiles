@@ -15,7 +15,7 @@ return {
         },
         -- {
         --     "<leader>gr",
-l       --     "<cmd>Trouble lsp_references toggle focus=true win.size=.25 preview.type=split preview.relative=win preview.position=right preview.size=0.5<cr>",
+        --     "<cmd>Trouble lsp_references toggle focus=true win.size=.25 preview.type=split preview.relative=win preview.position=right preview.size=0.5<cr>",
         --     desc = "LSP Definitions / references / ... (Trouble)",
         -- },
     },
@@ -86,19 +86,19 @@ l       --     "<cmd>Trouble lsp_references toggle focus=true win.size=.25 previ
             trouble.open(implementationsOpts)
         end
 
-        vim.keymap.set("n", "<leader>qa", showDiagnostics, { desc = "Show Diagnostics" } ) 
-        vim.keymap.set("n", "<leader>qq", showQuicklist, { desc = "Show Quick Fix List" } ) 
-        vim.keymap.set("n", "gr", gotoReferences, { desc = "Go to references" } ) 
-        vim.keymap.set("n", "gd", gotoDefinitions, { desc = "Go to definitions" } ) 
-        vim.keymap.set("n", "gi", gotoImplementations, { desc = "Go to implementations" } ) 
+        vim.keymap.set("n", "<leader>qa", showDiagnostics, { desc = "Show Diagnostics" } )
+        vim.keymap.set("n", "<leader>qq", showQuicklist, { desc = "Show Quick Fix List" } )
+        vim.keymap.set("n", "gr", gotoReferences, { desc = "Go to references" } )
+        vim.keymap.set("n", "gd", gotoDefinitions, { desc = "Go to definitions" } )
+        vim.keymap.set("n", "gi", gotoImplementations, { desc = "Go to implementations" } )
         vim.keymap.set("n", "<A-n>", function()
             trouble.next()
             trouble.jump()
-        end, { desc = "Next Trouble" } ) 
+        end, { desc = "Next Trouble" } )
         vim.keymap.set("n", "<A-p>", function()
             trouble.prev()
             trouble.jump()
-        end, { desc = "Previous Trouble" } ) 
+        end, { desc = "Previous Trouble" } )
 
     end,
 }

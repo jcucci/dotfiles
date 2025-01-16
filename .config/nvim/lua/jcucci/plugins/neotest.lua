@@ -19,8 +19,14 @@ return {
                         args = { justMyCode = false },
                         adapter_name = "coreclr"
                     },
-                    discovery_root = "project"
+                    discovery_root = "solution"
                 })
+            },
+            discover = {
+                enabled = true,
+                filter_dir = function(name)
+                    return name ~= "bin" and name ~= "obj" and name ~= "api-tests"
+                end
             },
             summary = {
                 open = "botright vsplit | vertical resize 150"

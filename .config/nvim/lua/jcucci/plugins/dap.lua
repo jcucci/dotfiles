@@ -12,7 +12,7 @@ return {
         dap.adapters.coreclr = {
             type = "executable",
             command = "/usr/local/netcoredbg",
-            args = { "--interpreter=vscode", "--engineLogging='/home/jcucci/documents/debug.log'", "--log=file" },
+            args = { "--interpreter=vscode" },
             options = {
                 detached = false
             }

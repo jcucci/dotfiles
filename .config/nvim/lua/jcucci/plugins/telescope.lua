@@ -31,20 +31,20 @@ return {
         telescope.load_extension("fzf")
 
         -- set keymaps
-        local keymap = vim.keymap -- for conciseness
-
-        keymap.set("n", "<leader>fh", "<cmd>Telescope help_tags<cr>", { desc = "Fuzzy find help" })
-        keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
-        keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
-        keymap.set("n", "<leader>fg", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
-
-        keymap.set("n", "<leader>ft", function() 
-            require'telescope.builtin'.lsp_dynamic_workspace_symbols(require('telescope.themes').get_ivy({
-                path_display = "hidden",
-                symbol_width = 50,
-                symbols = { "class", "enum", "record", "interface" }
-            }))
-        end, { desc = "Find symbols" } )
+        -- local keymap = vim.keymap -- for conciseness
+        --
+        -- keymap.set("n", "<leader>fh", "<cmd>Telescope help_tags<cr>", { desc = "Fuzzy find help" })
+        -- keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
+        -- keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
+        -- keymap.set("n", "<leader>fg", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
+        --
+        -- keymap.set("n", "<leader>ft", function() 
+        --     require'telescope.builtin'.lsp_dynamic_workspace_symbols(require('telescope.themes').get_ivy({
+        --         path_display = "hidden",
+        --         symbol_width = 50,
+        --         symbols = { "class", "enum", "record", "interface" }
+        --     }))
+        -- end, { desc = "Find symbols" } )
 
     end,
 }

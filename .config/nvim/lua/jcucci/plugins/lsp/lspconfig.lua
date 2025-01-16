@@ -2,31 +2,53 @@ return {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
     dependencies = {
-        "hrsh7th/cmp-nvim-lsp",
+        "saghen/blink.cmp",
         "seblj/roslyn.nvim",
-        { "antosha417/nvim-lsp-file-operations", config = true },
-        "folke/trouble.nvim"
+        { "antosha417/nvim-lsp-file-operations", config = true }
     },
     config = function()
         local roslyn = require("roslyn")
+        local blink_cmp = require("blink.cmp")
         local lspconfig = require("lspconfig")
-        local cmp_nvim_lsp = require("cmp_nvim_lsp")
-        local trouble = require("trouble")
         local builder = require("jcucci.core.makes.builder")
+        local runners = require("jcucci.core.testers.runners")
         local keymap = vim.keymap -- for conciseness
         local opts = { noremap = true, silent = true }
+        local snyk_token = os.getenv("SNYK_TOKEN")
+
+        local function code_action_current_line()
+            local line = vim.api.nvim_win_get_cursor(0)[1]
+            local line_text = vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1] or ""
+
+            local range = {
+                start = {line, 1},
+                ['end'] = {line, #line_text}
+            }
+
+            vim.lsp.buf.code_action({
+                range = range,
+                context = { only = {"quickfix"} }
+            })
+        end
 
         local on_attach = function(client, bufnr)
-
-            builder.register_compiler()
 
             opts.buffer = bufnr
 
             opts.desc = "Compile workspace"
-            keymap.set({ "n", "v" }, "<leader>m", builder.compile_project, opts)
+            keymap.set({ "n", "v" }, "<leader>bb", function() builder.compile_project(false) end, opts)
+
+            opts.desc = "Compile workspace (Full)"
+            keymap.set({ "n", "v" }, "<leader>B", function() builder.compile_project(true) end, opts)
+
+            opts.desc = "Run Tests"
+            keymap.set({ "n", "v" }, "<leader>tt", runners.run_tests, opts)
+
+            opts.desc = "Run Tests (Full)"
+            keymap.set({ "n", "v" }, "<leader>T", runners.run_tests, opts)
 
             opts.desc = "See available code actions"
-            keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts) -- see available code actions, in visual mode will apply to selection
+            keymap.set({ "n", "v" }, "<leader>ca", code_action_current_line, opts)
 
             opts.desc = "Smart rename"
             keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts) -- smart rename
@@ -50,7 +72,7 @@ return {
                 end, opts)
         end
 
-        local capabilities = cmp_nvim_lsp.default_capabilities()
+        local capabilities = blink_cmp.get_lsp_capabilities()
 
         local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
         for type, icon in pairs(signs) do
@@ -62,7 +84,7 @@ return {
 
         vim.diagnostic.config({
             update_in_insert = true,
-            virtual_text = false,
+            virtual_text = true,
             underline = false,
             severity_sort = true
         })
@@ -82,13 +104,13 @@ return {
         lspconfig["snyk_ls"].setup({
             capabilities = capabilities,
             on_attach = on_attach,
-            token = "37b3cba1-8509-4f3a-a6c6-f0901dd206cf"
+            token = snyk_token
         })
 
         roslyn.setup({
             -- ft = "cs",
             -- opts = {
-            choose_sln = function(sln)
+            choose_target = function(sln)
                 return vim.iter(sln):find(function(item)
                     if not string.find(item, "Tests", 1, true) then
                         return item
@@ -133,6 +155,12 @@ return {
             on_attach = on_attach,
         })
 
+        -- bash
+        lspconfig["bashls"].setup({
+            capabilities = capabilities,
+            on_attach = on_attach,
+        })
+
         -- configure zig server
         lspconfig["zls"].setup({
             capabilities = capabilities,
@@ -140,24 +168,24 @@ return {
         })
 
         -- configure lua server (with special settings)
-        -- lspconfig["lua_ls"].setup({
-        --     capabilities = capabilities,
-        --     on_attach = on_attach,
-        --     settings = { -- custom settings for lua
-        --         Lua = {
-        --             -- make the language server recognize "vim" global
-        --             diagnostics = {
-        --                 globals = { "vim" },
-        --             },
-        --             workspace = {
-        --                 -- make language server aware of runtime files
-        --                 library = {
-        --                     [vim.fn.expand("$VIMRUNTIME/lua")] = true,
-        --                     [vim.fn.stdpath("config") .. "/lua"] = true,
-        --                 },
-        --             },
-        --         },
-        --     },
-        -- })
+        lspconfig["lua_ls"].setup({
+            capabilities = capabilities,
+            on_attach = on_attach,
+            settings = { -- custom settings for lua
+                Lua = {
+                    -- make the language server recognize "vim" global
+                    diagnostics = {
+                        globals = { "vim" },
+                    },
+                    workspace = {
+                        -- make language server aware of runtime files
+                        library = {
+                            [vim.fn.expand("$VIMRUNTIME/lua")] = true,
+                            [vim.fn.stdpath("config") .. "/lua"] = true,
+                        },
+                    },
+                },
+            },
+        })
     end,
 }
