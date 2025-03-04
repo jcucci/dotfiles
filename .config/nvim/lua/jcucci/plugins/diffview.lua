@@ -40,7 +40,7 @@ return {
                 },
                 merge_tool = {
                   -- Config for conflicted files in diff views during a merge or rebase.
-                  layout = "diff3_horizontal",
+                  layout = "diff3_mixed",
                   disable_diagnostics = true,   -- Temporarily disable diagnostics for diff buffers while in the view.
                   winbar_info = true,           -- See |diffview-config-view.x.winbar_info|
                 },
@@ -52,7 +52,7 @@ return {
                 },
               },
               file_panel = {
-                listing_style = "tree",             -- One of 'list' or 'tree'
+                listing_style = "list",             -- One of 'list' or 'tree'
                 tree_options = {                    -- Only applies when listing_style is 'tree'
                   flatten_dirs = true,              -- Flatten dirs that only contain one single dir
                   folder_statuses = "only_folded",  -- One of 'never', 'only_folded' or 'always'.

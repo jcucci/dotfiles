@@ -2,23 +2,6 @@ return {
     "folke/trouble.nvim",
     lazy = false,
     cmd = "Trouble",
-    keys = {
-        -- {
-        --     "<leader>D",
-        --     "<cmd>Trouble diagnostics toggle win.size=.25 preview.type=split preview.relative=win preview.position=right preview.size=0.5 filter.severity=vim.diagnostic.severity.ERROR<cr>",
-        --     desc = "Diagnostics (Trouble)",
-        -- },
-        {
-            "<leader>cs",
-            "<cmd>Trouble symbols toggle focus=false<cr>",
-            desc = "Symbols (Trouble)",
-        },
-        -- {
-        --     "<leader>gr",
-        --     "<cmd>Trouble lsp_references toggle focus=true win.size=.25 preview.type=split preview.relative=win preview.position=right preview.size=0.5<cr>",
-        --     desc = "LSP Definitions / references / ... (Trouble)",
-        -- },
-    },
     config = function()
         local trouble = require("trouble")
 
@@ -62,11 +45,11 @@ return {
             trouble.toggle(diagnosticOpts)
         end
 
-        local showQuicklist = function()
-            local quickfixOpts = vim.deepcopy(diagOpts)
-            quickfixOpts.mode = "quickfix"
-            trouble.toggle(quickfixOpts)
-        end
+        -- local showQuicklist = function()
+        --     local quickfixOpts = vim.deepcopy(diagOpts)
+        --     quickfixOpts.mode = "quickfix"
+        --     trouble.toggle(quickfixOpts)
+        -- end
 
         local gotoReferences = function()
             local referencesOpts = vim.deepcopy(lspOpts)
@@ -86,8 +69,8 @@ return {
             trouble.open(implementationsOpts)
         end
 
-        vim.keymap.set("n", "<leader>qa", showDiagnostics, { desc = "Show Diagnostics" } )
-        vim.keymap.set("n", "<leader>qq", showQuicklist, { desc = "Show Quick Fix List" } )
+        vim.keymap.set("n", "<leader>qq", showDiagnostics, { desc = "Show Diagnostics" } )
+        -- vim.keymap.set("n", "<leader>qq", showQuicklist, { desc = "Show Quick Fix List" } )
         vim.keymap.set("n", "gr", gotoReferences, { desc = "Go to references" } )
         vim.keymap.set("n", "gd", gotoDefinitions, { desc = "Go to definitions" } )
         vim.keymap.set("n", "gi", gotoImplementations, { desc = "Go to implementations" } )

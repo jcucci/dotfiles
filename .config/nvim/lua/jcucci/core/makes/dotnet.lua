@@ -1,7 +1,19 @@
 local M = {}
 
 function M.is_dotnet()
-    return vim.g.roslyn_nvim_selected_solution ~= nil
+    -- Get all buffers
+    local buffers = vim.api.nvim_list_bufs()
+    for _, bufnr in ipairs(buffers) do
+        if vim.api.nvim_buf_is_loaded(bufnr) then
+            local clients = vim.lsp.get_clients({ bufnr = bufnr })
+            for _, client in ipairs(clients) do
+                if client.name:lower():match("roslyn") then
+                    return true
+                end
+            end
+        end
+    end
+    return false
 end
 
 function M.get_build_command_full()
@@ -55,7 +67,7 @@ function M.process_diagnostics(build_output)
                 lnum, col = "1", "1"
             end
 
-            if message:match("https://") then
+            if message and message:match("https://") then
                 message = message:gsub("(https://%S+)", " \n→ %1")
             end
 

@@ -35,7 +35,7 @@ local compile_project = function(maker, build_command)
 
     local build_output = {}
     local seen_lines = {}  -- Track unique lines
-    
+
     local function add_output_line(line)
         if line ~= "" and not seen_lines[line] then
             seen_lines[line] = true

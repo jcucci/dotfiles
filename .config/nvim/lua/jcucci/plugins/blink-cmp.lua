@@ -1,16 +1,12 @@
 return {
     'saghen/blink.cmp',
-    dependencies = { 'rafamadriz/friendly-snippets', 'milanglacier/minuet-ai.nvim' },
+    dependencies = { 'rafamadriz/friendly-snippets', 'milanglacier/minuet-ai.nvim', 'saghen/blink.compat' },
     version = '*',
     opts_extend = { "sources.default" },
     config = function()
         local blink = require("blink-cmp")
-        local minuet = require("minuet")
 
         blink.setup({
-            -- keymap = { preset = 'default' },
-            keymap = { preset = 'default', ['<A-y>'] = minuet.make_blink_map(), },
-
             completion = {
                 menu = {
                     border = "rounded",
@@ -26,18 +22,35 @@ return {
                 },
             },
 
+            keymap = {
+                preset = "super-tab"
+            },
+
             appearance = {
                 use_nvim_cmp_as_default = true,
                 nerd_font_variant = 'mono',
             },
 
             sources = {
-                default = { 'lsp', 'path', 'snippets', 'buffer', 'minuet' },
+                default = { 'lsp', 'path', 'snippets', 'buffer', 'avante_commands', 'avante_mentions', 'avante_files' },
                 providers = {
-                    minuet = {
-                        name = 'minuet',
-                        module = 'minuet.blink',
-                        score_offset = 8, -- Gives minuet higher priority among suggestions
+                    avante_commands = {
+                        name = "avante_commands",
+                        module = "blink.compat.source",
+                        score_offset = 90, -- show at a higher priority than lsp
+                        opts = {},
+                    },
+                    avante_files = {
+                        name = "avante_commands",
+                        module = "blink.compat.source",
+                        score_offset = 100, -- show at a higher priority than lsp
+                        opts = {},
+                    },
+                    avante_mentions = {
+                        name = "avante_mentions",
+                        module = "blink.compat.source",
+                        score_offset = 1000, -- show at a higher priority than lsp
+                        opts = {},
                     },
                 },
             },

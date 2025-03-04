@@ -108,8 +108,7 @@ return {
         })
 
         roslyn.setup({
-            -- ft = "cs",
-            -- opts = {
+            broad_search = true,
             choose_target = function(sln)
                 return vim.iter(sln):find(function(item)
                     if not string.find(item, "Tests", 1, true) then

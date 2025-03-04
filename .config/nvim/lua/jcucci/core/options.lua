@@ -4,6 +4,10 @@ local opt = vim.opt
 opt.relativenumber = true
 opt.number = true
 
+-- code folding
+-- opt.foldmethod = "indent"
+-- opt.foldexpr = "nvim_treesitter#foldexpr()"
+
 -- indents
 opt.tabstop = 4
 opt.shiftwidth = 4
