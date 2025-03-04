@@ -13,11 +13,13 @@
     "git.enableSmartCommit": true,
     "snyk.advanced.cliPath": "/home/jcucci/.local/share/snyk-ls/snyk-linux",
     "snyk.yesWelcomeNotification": false,
+    "terminal.integrated.fontSize": 16,
     "snyk.trustedFolders": [
         "/home/jcucci/projects/sharp/"
     ],
     "snyk.scanningMode": "manual",
     "editor.tabSize": 3,
+    "editor.fontSize": 17,
     "explorer.confirmDragAndDrop": false,
     "editor.inlineSuggest.suppressSuggestions": true,
     "workbench.activityBar.location": "hidden",
@@ -52,10 +54,20 @@
     "workbench.editor.splitInGroupLayout": "vertical",
     "snyk.folderConfigs": [
         {
-            "folderPath": "/home/jcucci/projects/costerm",
-            "baseBranch": "main",
+            "folderPath": "/home/jcucci/projects/sharp/snowdrop-activities-be",
+            "baseBranch": "master",
             "localBranches": [
-                "main"
+                "SHRP-105932",
+                "SHRP-113958",
+                "SHRP-118915",
+                "SHRP-119940",
+                "SHRP-124051",
+                "SHRP-96972",
+                "gateway",
+                "gateway-az",
+                "master",
+                "ninja",
+                "staging"
             ]
         }
     ],
@@ -93,12 +105,5 @@
     },
     "workbench.iconTheme": "helium-icon-theme",
     "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Noto Color Emoji'",
-    "window.zoomLevel": 0.5,
-    "cursor.cpp.disabledLanguages": [
-        "plaintext",
-        "markdown",
-        "scminput"
-    ],
-    "editor.fontSize": 15,
-    "rust-analyzer.completion.fullFunctionSignatures.enable": true
+    "window.zoomLevel": 0.5
 }
