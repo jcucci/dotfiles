@@ -24,21 +24,21 @@
         },
         "format": "{capacity}% {icon}",
         "format-charging": "{capacity}% ",
-        "format-plugged": "{capacity}% ",
+        "format-plugged": "{capacity}%  ",
         "format-alt": "{time} {icon}",
         // "format-good": "", // An empty format will hide the module
         // "format-full": "",
-        "format-icons": ["", "", "", "", ""]
+        "format-icons": [" ", " ", " ", " ", " "]
     },
     "battery#bat2": {
         "bat": "BAT2"
     },
     "network": {
-        "format-wifi": "({signalStrength}%) ",
-        "format-ethernet": "󰛳",
-        "tooltip-format": "{gwaddr} 󰛳",
-        "format-linked": "(No IP) 󰒍",
-        "format-disconnected": "Disconnected 󰲛",
+        "format-wifi": "({signalStrength}%)  ",
+        "format-ethernet": "󰛳 ",
+        "tooltip-format": "{gwaddr} 󰛳 ",
+        "format-linked": "(No IP) 󰒍 ",
+        "format-disconnected": "Disconnected 󰲛 ",
         "format-alt": "{ifname}: {ipaddr}/{cidr}"
     },
     "pulseaudio": {
@@ -49,13 +49,13 @@
         "format-source": " {volume}%",
         "format-source-muted": "",
         "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
-            "car": "",
-            "default": ["", "", ""]
+            "headphone": " ",
+            "hands-free": " ",
+            "headset": " ",
+            "phone": " ",
+            "portable": " ",
+            "car": " ",
+            "default": ["", " ", " "]
         },
         "on-click": "pavucontrol"
     }

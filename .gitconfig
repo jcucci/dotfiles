@@ -24,3 +24,5 @@
     line-numbers = true
 [merge]
     conflictstyle = zdiff3
+[pull]
+	rebase = false

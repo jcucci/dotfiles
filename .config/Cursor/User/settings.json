@@ -52,41 +52,6 @@
     "breadcrumbs.icons": false,
     "workbench.editor.closeOnFileDelete": true,
     "workbench.editor.splitInGroupLayout": "vertical",
-    "snyk.folderConfigs": [
-        {
-            "folderPath": "/home/jcucci/projects/sharp/snowdrop-charge-assemblies-be",
-            "baseBranch": "main",
-            "localBranches": [
-                "SHRP-106682",
-                "SHRP-116189",
-                "SHRP-118628",
-                "SHRP-120315",
-                "SHRP-120457",
-                "SHRP-120937",
-                "SHRP-121795",
-                "SHRP-121843",
-                "SHRP-122444",
-                "SHRP-122484",
-                "SHRP-122525",
-                "SHRP-122531",
-                "SHRP-122549",
-                "SHRP-122979",
-                "SHRP-123084",
-                "SHRP-123123",
-                "SHRP-123139",
-                "SHRP-123275",
-                "SHRP-123325",
-                "SHRP-124330",
-                "SHRP-124348",
-                "SHRP-125242",
-                "SHRP-96972",
-                "gateway",
-                "main",
-                "ninja",
-                "staging"
-            ]
-        }
-    ],
     "errorLens.codeLensEnabled": false,
     "errorLens.enabled": true,
     "errorLens.enabledInMergeConflict": false,
@@ -121,10 +86,5 @@
     },
     "workbench.iconTheme": "helium-icon-theme",
     "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Noto Color Emoji'",
-    "window.zoomLevel": 0.4,
-    "cursor.cpp.disabledLanguages": [
-        "plaintext",
-        "markdown",
-        "scminput"
-    ]
+    "rust-analyzer.completion.fullFunctionSignatures.enable": true
 }
