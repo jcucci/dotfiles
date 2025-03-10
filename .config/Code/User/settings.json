@@ -19,7 +19,7 @@
     ],
     "snyk.scanningMode": "manual",
     "editor.tabSize": 3,
-    "editor.fontSize": 17,
+    "editor.fontSize": 15,
     "explorer.confirmDragAndDrop": false,
     "editor.inlineSuggest.suppressSuggestions": true,
     "workbench.activityBar.location": "hidden",
@@ -55,20 +55,10 @@
     "workbench.editor.splitInGroupLayout": "vertical",
     "snyk.folderConfigs": [
         {
-            "folderPath": "/home/jcucci/projects/sharp/snowdrop-activities-be",
-            "baseBranch": "master",
+            "folderPath": "/home/jcucci/projects/costerm",
+            "baseBranch": "main",
             "localBranches": [
-                "SHRP-105932",
-                "SHRP-113958",
-                "SHRP-118915",
-                "SHRP-119940",
-                "SHRP-124051",
-                "SHRP-96972",
-                "gateway",
-                "gateway-az",
-                "master",
-                "ninja",
-                "staging"
+                "main"
             ]
         }
     ],
@@ -106,5 +96,5 @@
     },
     "workbench.iconTheme": "helium-icon-theme",
     "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Noto Color Emoji'",
-    "window.zoomLevel": 0.5,
+    "window.zoomLevel": 0.4,
 }

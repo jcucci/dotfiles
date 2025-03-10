@@ -30,6 +30,10 @@ setopt hist_save_no_dups
 setopt hist_ignore_dups
 setopt globdots
 
+if [[ "$ARGV0" == "/opt/cursor-bin/cursor-bin.AppImage" ]]; then
+  unset ARGV0
+fi
+
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' menu no

@@ -39,3 +39,10 @@ gbdel() {
     git push origin --delete $1
 }
 
+gcd() {
+  commit=$(git log --pretty="%H %s" --graph | fzf | awk '{print $2}')
+  if [ -n "$commit" ]; then
+    git show --pretty="" --color=always $commit | delta
+  fi
+}
+

@@ -13,11 +13,13 @@
     "git.enableSmartCommit": true,
     "snyk.advanced.cliPath": "/home/jcucci/.local/share/snyk-ls/snyk-linux",
     "snyk.yesWelcomeNotification": false,
+    "terminal.integrated.fontSize": 16,
     "snyk.trustedFolders": [
         "/home/jcucci/projects/sharp/"
     ],
     "snyk.scanningMode": "manual",
     "editor.tabSize": 3,
+    "editor.fontSize": 15,
     "explorer.confirmDragAndDrop": false,
     "editor.inlineSuggest.suppressSuggestions": true,
     "workbench.activityBar.location": "hidden",
@@ -52,10 +54,36 @@
     "workbench.editor.splitInGroupLayout": "vertical",
     "snyk.folderConfigs": [
         {
-            "folderPath": "/home/jcucci/projects/costerm",
+            "folderPath": "/home/jcucci/projects/sharp/snowdrop-charge-assemblies-be",
             "baseBranch": "main",
             "localBranches": [
-                "main"
+                "SHRP-106682",
+                "SHRP-116189",
+                "SHRP-118628",
+                "SHRP-120315",
+                "SHRP-120457",
+                "SHRP-120937",
+                "SHRP-121795",
+                "SHRP-121843",
+                "SHRP-122444",
+                "SHRP-122484",
+                "SHRP-122525",
+                "SHRP-122531",
+                "SHRP-122549",
+                "SHRP-122979",
+                "SHRP-123084",
+                "SHRP-123123",
+                "SHRP-123139",
+                "SHRP-123275",
+                "SHRP-123325",
+                "SHRP-124330",
+                "SHRP-124348",
+                "SHRP-125242",
+                "SHRP-96972",
+                "gateway",
+                "main",
+                "ninja",
+                "staging"
             ]
         }
     ],
@@ -93,12 +121,10 @@
     },
     "workbench.iconTheme": "helium-icon-theme",
     "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Noto Color Emoji'",
-    "window.zoomLevel": 0.5,
+    "window.zoomLevel": 0.4,
     "cursor.cpp.disabledLanguages": [
         "plaintext",
         "markdown",
         "scminput"
-    ],
-    "editor.fontSize": 15,
-    "rust-analyzer.completion.fullFunctionSignatures.enable": true
+    ]
 }

@@ -376,11 +376,6 @@
         "when": "(vim.mode == 'Normal' && editorTextFocus) || (!editorTextFocus && !inputFocus)"
     },
     {
-        "key": "shift-;",
-        "command": "workbench.action.showCommands",
-        "when": "(vim.mode == 'Normal' && editorTextFocus) || (!editorTextFocus && !inputFocus)"
-    },
-    {
         "key": "shift-.",
         "command": "editor.action.indentLines",
         "when": "(vim.mode == 'Visual' || vim.mode == 'VisualLine' || vim.mode == 'VisualBlock') && editorTextFocus",
