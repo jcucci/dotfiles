@@ -84,7 +84,21 @@
             "statusBar.foreground": "accent"
         }
     },
-    "workbench.iconTheme": "helium-icon-theme",
+    "workbench.iconTheme": "material-icon-theme",
     "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Noto Color Emoji'",
-    "rust-analyzer.completion.fullFunctionSignatures.enable": true
+    "rust-analyzer.completion.fullFunctionSignatures.enable": true,
+    "snyk.folderConfigs": [
+        {
+            "folderPath": "/home/jcucci/projects/sharp/snowdrop-activities-be",
+            "baseBranch": "master",
+            "localBranches": [
+                "SHRP-128480",
+                "SHRP-129181",
+                "develop",
+                "gateway",
+                "master",
+                "ninja"
+            ]
+        }
+    ]
 }

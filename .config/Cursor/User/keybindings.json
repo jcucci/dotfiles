@@ -450,4 +450,17 @@
         "command": "merge-conflict.accept.all-incoming",
         "when": "vim.mode == 'Normal' && editorTextFocus && isMergeEditor"
     },
+    {
+        "key": "space a i",
+        "command": "aipopup.action.modal.generate",
+        "when": "(vim.mode == 'Normal' || vim.mode == 'Visual') && editorFocus && !composerBarIsVisible"
+    },
+    {
+        "key": "ctrl+i",
+        "command": "composerMode.agent"
+    },
+    {
+        "key": "ctrl+shift+i",
+        "command": "composer.newAgentChat"
+    },
 ]
