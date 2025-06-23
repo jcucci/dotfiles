@@ -99,7 +99,7 @@
             "statusBar.foreground": "accent"
         }
     },
-    "workbench.iconTheme": "helium-icon-theme",
+    "workbench.iconTheme": "material-icon-theme",
     "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Noto Color Emoji'",
     "window.zoomLevel": 0.4,
     "go.toolsManagement.autoUpdate": true,
@@ -113,7 +113,8 @@
     },
     "[csharp]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "nromanov.dotrush",
+        "editor.defaultFormatter": "nromanov.dotrush"
     },
     "editor.inlayHints.enabled": "off",
+    "rust-analyzer.completion.fullFunctionSignatures.enable": true
 }

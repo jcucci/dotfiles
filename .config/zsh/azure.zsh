@@ -203,3 +203,92 @@ aztriggers() {
     fi
     az functionapp function list --resource-group "$resource_group" --name "$func_app" | jq '[.[] | {runtime: .config.language, name: .config.name, id: id}]'
 }
+
+azsacc() {
+    AZ_STORAGE_ACCOUNT=$(az storage account list --query "[].name" -o tsv | fzf --prompt="Select Storage Account: " --height=40% --border)
+    echo "AZ_STORAGE_ACCOUNT: $AZ_STORAGE_ACCOUNT"
+}
+
+azscont() {
+    AZ_STORAGE_CONTAINER=$(az storage container list --account-name $AZ_STORAGE_ACCOUNT --auth-mode login --query "[].name" -o tsv | fzf --prompt="Select Storage Container: " --height=40% --border)
+    echo "AZ_STORAGE_CONTAINER: $AZ_STORAGE_CONTAINER"
+}
+
+azslist() {
+    if [ -z "$1" ]; then
+        az storage blob list \
+            --account-name $AZ_STORAGE_ACCOUNT \
+            --container $AZ_STORAGE_CONTAINER \
+            --delimiter '/' \
+            --query "[].name" \
+            --auth-mode login \
+            --output tsv
+    else
+        az storage blob list \
+            --account-name $AZ_STORAGE_ACCOUNT \
+            --container $AZ_STORAGE_CONTAINER \
+            --prefix $1 \
+            --delimiter '/' \
+            --query "[].name" \
+            --auth-mode login \
+            --output tsv
+    fi
+}
+
+azsorglist() {
+    azslist "Organizations/$1/"
+}
+
+azsprojlist() {
+    local projPath=$(azsorglist $1 | fzf --prompt="Select Projection Path:" --height=40% --border)
+
+    if [ -z "$2" ]; then
+        azslist "$projPath"
+    else
+        azslist "$projPath$2"
+    fi
+}
+
+azsproj() {
+
+    local projPath=$(azsorglist $1 | fzf --prompt="Select Projection Path:" --height=40% --border)
+    if [ -z "$projPath" ]; then
+        echo "No projection path selected."
+        return 1
+    fi
+
+    local projName=$(basename $projPath)
+    
+    local blobList
+    if [ -z "$2" ]; then
+        blobList=$(azslist "$projPath")
+    else
+        blobList=$(azslist "$projPath$2")
+    fi
+    
+    local blobPath=$(echo "$blobList" | fzf --prompt="Select Blob Path:" --height=40% --border)
+    if [ -z "$blobPath" ]; then
+        echo "No blob path selected."
+        return 1
+    fi
+
+    local blobFileName=$(basename $blobPath)
+    local destDir="$HOME/downloads/"
+
+    if [ "$3" ]; then
+        destDir="$HOME/documents/sharp/$3/"
+        mkdir -p "$destDir"
+    fi
+
+    local destFile="$destDir$projName-$blobFileName"
+
+    az storage blob download \
+        --account-name $AZ_STORAGE_ACCOUNT \
+        --container $AZ_STORAGE_CONTAINER \
+        --file $destFile \
+        --name $blobPath \
+        --auth-mode login \
+        --output none
+
+    bat "$destFile"
+}
