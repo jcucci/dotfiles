@@ -46,14 +46,18 @@ export PATH=$PATH:/home/jcucci/.dotnet/tools
 export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
 export PATH=$PATH:$DOTNET_ROOT/azure-functions-cli
 export PATH=$PATH:$HOME/apps/hawk-4.1.0
+export PATH=$PATH:/home/jcucci/.local/share/JetBrains/Toolbox/apps/rider/bin/
+export PATH=$PATH:/home/jcucci/.npm-global/bin
 export NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED="true"
 export VISUAL="nvim"
 export EDITOR="nvim"
+export XDG_DATA_DIRS="/usr/local/share:/usr/share"
 export MOZ_ENABLE_WAYLAND=1
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 # general
+alias claude="/home/jcucci/.claude/local/claude"
 alias ls='eza --color --oneline'
 alias la='eza -la --color --icons'
 alias cls='clear'

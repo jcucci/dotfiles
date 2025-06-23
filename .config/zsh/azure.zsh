@@ -77,6 +77,14 @@ kvset() {
     az keyvault secret set --vault-name king-ninja-sharp-kv -n $1 --value $2
 }
 
+azvarshow() {
+  az pipelines variable-group variable list --group-id 1 | jq --arg key "$1" '.[$key]'
+}
+
+azvarset() {
+    az pipelines variable-group variable create --group-id 1 --name $1 --value $2
+}
+
 azstorage() {
     local resource_group=$(azfzfgroup)
     if [ -z "$resource_group" ]; then

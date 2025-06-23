@@ -201,6 +201,11 @@
         "when": "vim.mode == 'Normal' && editorTextFocus",
     },
     {
+        "key": "g i",
+        "command": "editor.action.goToImplementation",
+        "when": "vim.mode == 'Normal' && editorTextFocus",
+    },
+    {
         "key": "g r",
         "command": "editor.action.goToReferences",
         "when": "vim.mode == 'Normal' && editorTextFocus",
@@ -376,6 +381,11 @@
         "when": "(vim.mode == 'Normal' && editorTextFocus) || (!editorTextFocus && !inputFocus)"
     },
     {
+        "key": "space q n",
+        "command": "go-to-next-error.nextInFiles.warning",
+        "when": "(vim.mode == 'Normal' && editorTextFocus) || (!editorTextFocus && !inputFocus)"
+    },
+    {
         "key": "shift-.",
         "command": "editor.action.indentLines",
         "when": "(vim.mode == 'Visual' || vim.mode == 'VisualLine' || vim.mode == 'VisualBlock') && editorTextFocus",
@@ -449,5 +459,17 @@
         "key": "c shift-a",
         "command": "merge-conflict.accept.all-incoming",
         "when": "vim.mode == 'Normal' && editorTextFocus && isMergeEditor"
+    },
+    {
+        "key": "ctrl+i",
+        "command": "composerMode.agent"
+    },
+    {
+        "key": "shift+enter",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": {
+            "text": "\\\r\n"
+        },
+        "when": "terminalFocus"
     },
 ]
