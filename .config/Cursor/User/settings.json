@@ -89,14 +89,14 @@
     "rust-analyzer.completion.fullFunctionSignatures.enable": true,
     "snyk.folderConfigs": [
         {
-            "folderPath": "/home/jcucci/projects/sharp/snowdrop-activities-be",
-            "baseBranch": "master",
+            "folderPath": "/home/jcucci/projects/sharp/snowdrop-charge-interventions-be",
+            "baseBranch": "main",
             "localBranches": [
-                "SHRP-128480",
-                "SHRP-129181",
+                "SHRP-125206",
+                "SHRP-125708",
                 "develop",
                 "gateway",
-                "master",
+                "main",
                 "ninja"
             ]
         }
