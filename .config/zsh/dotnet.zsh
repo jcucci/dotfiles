@@ -46,10 +46,10 @@ dnversions() {
         --header "Accept: application/json" \
         --header "Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64 -w 0)" \
         "https://sharpfm.pkgs.visualstudio.com/_packaging/64eacba0-4a33-4524-a207-22b9304801fa/nuget/v3/query2/?q=$package_name&prerelease=false" | \
-        jq --arg pkg "$package_name" '.data[] | select(.id | ascii_downcase == ($pkg | ascii_downcase)) | {name: .id, versions: (.versions | sort_by(.) | reverse | .[0:5])}'
+        jq --arg pkg "$package_name" '.data[] | select(.id | ascii_downcase == ($pkg | ascii_downcase)) | {name: .id, versions: (.versions | sort_by(.) | reverse | .[0:8])}'
     else
         curl -s "https://api-v2v3search-0.nuget.org/query?q=$package_name&prerelease=false" | \
-        jq --arg pkg "$package_name" '.data[] | select(.id | ascii_downcase == ($pkg | ascii_downcase)) | {name: .id, versions: (.versions | sort_by(.) | reverse | .[0:5])}'
+        jq --arg pkg "$package_name" '.data[] | select(.id | ascii_downcase == ($pkg | ascii_downcase)) | {name: .id, versions: (.versions | sort_by(.) | reverse | .[0:8])}'
     fi
 }
 

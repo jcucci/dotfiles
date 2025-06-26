@@ -15,7 +15,8 @@
     "snyk.yesWelcomeNotification": false,
     "terminal.integrated.fontSize": 16,
     "snyk.trustedFolders": [
-        "/home/jcucci/projects/sharp/"
+        "/home/jcucci/projects/sharp/",
+        "/home/jcucci/.config/zsh"
     ],
     "snyk.scanningMode": "manual",
     "editor.tabSize": 3,
@@ -52,6 +53,33 @@
     "breadcrumbs.icons": false,
     "workbench.editor.closeOnFileDelete": true,
     "workbench.editor.splitInGroupLayout": "vertical",
+    "snyk.folderConfigs": [
+        {
+            "folderPath": "/home/jcucci/projects/sharp/snowdrop-activities-be",
+            "baseBranch": "master",
+            "localBranches": [
+                "SHRP-119940",
+                "SHRP-125194",
+                "SHRP-125195",
+                "SHRP-125195-2",
+                "SHRP-126389",
+                "SHRP-126868",
+                "SHRP-128169",
+                "SHRP-128480",
+                "SHRP-129181",
+                "SHRP-129558",
+                "SHRP-129852",
+                "SHRP-130685",
+                "SHRP-96972",
+                "develop",
+                "gateway",
+                "gateway-az",
+                "main",
+                "master",
+                "ninja"
+            ]
+        }
+    ],
     "errorLens.codeLensEnabled": false,
     "errorLens.enabled": true,
     "errorLens.enabledInMergeConflict": false,
@@ -86,19 +114,41 @@
     },
     "workbench.iconTheme": "material-icon-theme",
     "terminal.integrated.fontFamily": "'CaskaydiaCove Nerd Font', 'Noto Color Emoji'",
+    "window.zoomLevel": 0.4,
+    "go.toolsManagement.autoUpdate": true,
+    "cursor.cpp.disabledLanguages": [
+        "plaintext",
+        "markdown",
+        "scminput"
+    ],
+    "vs-kubernetes": {
+        "vs-kubernetes.crd-code-completion": "disabled"
+    },
+    "[csharp]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "nromanov.dotrush"
+    },
+    "editor.inlayHints.enabled": "off",
     "rust-analyzer.completion.fullFunctionSignatures.enable": true,
     "snyk.folderConfigs": [
         {
-            "folderPath": "/home/jcucci/projects/sharp/snowdrop-charge-interventions-be",
-            "baseBranch": "main",
+            "folderPath": "/home/jcucci/projects/sharp/snowdrop-activities-be",
+            "baseBranch": "master",
             "localBranches": [
-                "SHRP-125206",
-                "SHRP-125708",
+                "SHRP-128480",
+                "SHRP-129181",
                 "develop",
                 "gateway",
-                "main",
+                "master",
                 "ninja"
             ]
         }
     ]
+    "dotnet.server.useOmnisharp": true,
+    "snyk.severity": {
+        "critical": false,
+        "low": false,
+        "medium": false,
+        "high": false
+    }
 }

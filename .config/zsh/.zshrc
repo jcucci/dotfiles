@@ -51,11 +51,13 @@ export NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED="true"
 export MSBuildSDKsPath=/usr/share/dotnet/sdk/$(dotnet --version)/Sdks
 export VISUAL="nvim"
 export EDITOR="nvim"
+export XDG_DATA_DIRS="/usr/local/share:/usr/share"
 export MOZ_ENABLE_WAYLAND=1
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
 # general
+alias claude="/home/jcucci/.claude/local/claude"
 alias ls='eza --color --oneline'
 alias la='eza -la --color --icons'
 alias cls='clear'
@@ -92,6 +94,7 @@ ninjasource() {
 
 source_env_file '/home/jcucci/.config/zsh/dev.env'
 [ -f ~/.config/zsh/azure.zsh ] && source ~/.config/zsh/azure.zsh
+[ -f ~/.config/zsh/claude.zsh ] && source ~/.config/zsh/claude.zsh
 [ -f ~/.config/zsh/dotnet.zsh ] && source ~/.config/zsh/dotnet.zsh
 [ -f ~/.config/zsh/docker.zsh ] && source ~/.config/zsh/docker.zsh
 [ -f ~/.config/zsh/git.zsh ] && source ~/.config/zsh/git.zsh
