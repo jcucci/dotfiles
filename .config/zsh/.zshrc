@@ -94,6 +94,7 @@ ninjasource() {
 
 source_env_file '/home/jcucci/.config/zsh/dev.env'
 [ -f ~/.config/zsh/azure.zsh ] && source ~/.config/zsh/azure.zsh
+[ -f ~/.config/zsh/claude.zsh ] && source ~/.config/zsh/claude.zsh
 [ -f ~/.config/zsh/dotnet.zsh ] && source ~/.config/zsh/dotnet.zsh
 [ -f ~/.config/zsh/docker.zsh ] && source ~/.config/zsh/docker.zsh
 [ -f ~/.config/zsh/git.zsh ] && source ~/.config/zsh/git.zsh

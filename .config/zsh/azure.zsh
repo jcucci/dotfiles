@@ -214,6 +214,39 @@ azscont() {
     echo "AZ_STORAGE_CONTAINER: $AZ_STORAGE_CONTAINER"
 }
 
+azsinit() {
+    local ticket_number=${1:-""}
+    
+    # Login and select subscription
+    az login
+    if [ $? -ne 0 ]; then
+        echo "Azure login failed."
+        return 1
+    fi
+    
+    # Call azsacc to set AZ_STORAGE_ACCOUNT
+    azsacc
+    if [ -z "$AZ_STORAGE_ACCOUNT" ]; then
+        echo "Failed to set storage account."
+        return 1
+    fi
+    
+    # Call azscont to set AZ_STORAGE_CONTAINER
+    azscont
+    if [ -z "$AZ_STORAGE_CONTAINER" ]; then
+        echo "Failed to set storage container."
+        return 1
+    fi
+    
+    # Set ticket number if provided
+    if [ -n "$ticket_number" ]; then
+        export SHARP_TICKET_NUMBER="$ticket_number"
+        echo "SHARP_TICKET_NUMBER: $SHARP_TICKET_NUMBER"
+    fi
+    
+    echo "Azure storage environment initialized successfully."
+}
+
 azslist() {
     if [ -z "$1" ]; then
         az storage blob list \
@@ -277,6 +310,9 @@ azsproj() {
 
     if [ "$3" ]; then
         destDir="$HOME/documents/sharp/$3/"
+        mkdir -p "$destDir"
+    elif [ -n "$SHARP_TICKET_NUMBER" ]; then
+        destDir="$HOME/documents/sharp/$SHARP_TICKET_NUMBER/"
         mkdir -p "$destDir"
     fi
 

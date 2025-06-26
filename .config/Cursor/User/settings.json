@@ -15,7 +15,8 @@
     "snyk.yesWelcomeNotification": false,
     "terminal.integrated.fontSize": 16,
     "snyk.trustedFolders": [
-        "/home/jcucci/projects/sharp/"
+        "/home/jcucci/projects/sharp/",
+        "/home/jcucci/.config/zsh"
     ],
     "snyk.scanningMode": "manual",
     "editor.tabSize": 3,
@@ -54,14 +55,26 @@
     "workbench.editor.splitInGroupLayout": "vertical",
     "snyk.folderConfigs": [
         {
-            "folderPath": "/home/jcucci/projects/sharp/snowdrop-patientencounters-be",
+            "folderPath": "/home/jcucci/projects/sharp/snowdrop-activities-be",
             "baseBranch": "master",
             "localBranches": [
-                "SHRP-125708",
-                "SHRP-125934",
-                "SHRP-129189",
+                "SHRP-119940",
+                "SHRP-125194",
+                "SHRP-125195",
+                "SHRP-125195-2",
+                "SHRP-126389",
+                "SHRP-126868",
+                "SHRP-128169",
+                "SHRP-128480",
+                "SHRP-129181",
+                "SHRP-129558",
+                "SHRP-129852",
+                "SHRP-130685",
+                "SHRP-96972",
+                "develop",
                 "gateway",
                 "gateway-az",
+                "main",
                 "master",
                 "ninja"
             ]
@@ -116,5 +129,12 @@
         "editor.defaultFormatter": "nromanov.dotrush"
     },
     "editor.inlayHints.enabled": "off",
-    "rust-analyzer.completion.fullFunctionSignatures.enable": true
+    "rust-analyzer.completion.fullFunctionSignatures.enable": true,
+    "dotnet.server.useOmnisharp": true,
+    "snyk.severity": {
+        "critical": false,
+        "low": false,
+        "medium": false,
+        "high": false
+    }
 }
