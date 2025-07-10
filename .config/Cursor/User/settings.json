@@ -130,6 +130,20 @@
     },
     "editor.inlayHints.enabled": "off",
     "rust-analyzer.completion.fullFunctionSignatures.enable": true,
+    "snyk.folderConfigs": [
+        {
+            "folderPath": "/home/jcucci/projects/sharp/snowdrop-activities-be",
+            "baseBranch": "master",
+            "localBranches": [
+                "SHRP-128480",
+                "SHRP-129181",
+                "develop",
+                "gateway",
+                "master",
+                "ninja"
+            ]
+        }
+    ],
     "snyk.severity": {
         "critical": false,
         "low": false,

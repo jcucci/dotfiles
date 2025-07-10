@@ -482,6 +482,14 @@
         "command": "composer.newAgentChat"
     },
     {
+        "key": "shift+enter",
+        "command": "workbench.action.terminal.sendSequence",
+        "args": {
+            "text": "\\\r\n"
+        },
+        "when": "terminalFocus"
+    },
+    {
         "key": "ctrl+alt+i",
         "command": "-workbench.action.chat.open",
         "when": "chatPanelParticipantRegistered || chatSetupInstalled"
