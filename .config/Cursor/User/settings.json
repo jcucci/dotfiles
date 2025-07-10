@@ -2,7 +2,6 @@
     "window.menuBarVisibility": "toggle",
     "workbench.sideBar.location": "right",
     "editor.fontFamily": "'CaskaydiaCove Nerd Font', 'Noto Color Emoji'",
-    "editor.formatOnSave": true,
     "razor.languageServer.directory": "/usr/share/dotnet",
     "editor.guides.indentation": false,
     "editor.lineNumbers": "relative",
@@ -16,7 +15,8 @@
     "terminal.integrated.fontSize": 16,
     "snyk.trustedFolders": [
         "/home/jcucci/projects/sharp/",
-        "/home/jcucci/.config/zsh"
+        "/home/jcucci/.config/zsh",
+        "/home/jcucci/projects/dotnet-sherlock-mcp"
     ],
     "snyk.scanningMode": "manual",
     "editor.tabSize": 3,
@@ -125,16 +125,26 @@
         "vs-kubernetes.crd-code-completion": "disabled"
     },
     "[csharp]": {
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "nromanov.dotrush"
+        "editor.formatOnSave": false,
+        "editor.defaultFormatter": "JetBrains.resharper-code"
     },
     "editor.inlayHints.enabled": "off",
     "rust-analyzer.completion.fullFunctionSignatures.enable": true,
-    "dotnet.server.useOmnisharp": true,
     "snyk.severity": {
         "critical": false,
         "low": false,
         "medium": false,
         "high": false
-    }
+    },
+    "editor.minimap.maxColumn": 200,
+    "prettier.printWidth": 200,
+    "koverage.coverageFileNames": [
+        "coverage.cobertura.xml",
+        "lcov.info",
+        "cov.xml",
+        "clover.xml",
+        "coverage.xml",
+        "jacoco.xml"
+    ],
+    "koverage.ignoredPathGlobs": "**/{node_modules,venv,.venv,vendor,obj,bin}/**"
 }

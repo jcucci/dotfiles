@@ -201,6 +201,11 @@
         "when": "vim.mode == 'Normal' && editorTextFocus",
     },
     {
+        "key": "g i",
+        "command": "editor.action.goToImplementation",
+        "when": "vim.mode == 'Normal' && editorTextFocus"
+    },
+    {
         "key": "g r",
         "command": "editor.action.goToReferences",
         "when": "vim.mode == 'Normal' && editorTextFocus",
@@ -450,4 +455,8 @@
         "command": "merge-conflict.accept.all-incoming",
         "when": "vim.mode == 'Normal' && editorTextFocus && isMergeEditor"
     },
+    {
+        "key": "tab",
+        "command": "-extension.vim_tab"
+    }
 ]
