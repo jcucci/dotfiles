@@ -1,0 +1,27 @@
+[
+  {
+    "label": "dotnet: build",
+    "command": "dotnet",
+    "args": ["build"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always",
+    "use_new_terminal": false
+  },
+  {
+    "label": "dotnet: run",
+    "command": "dotnet",
+    "args": ["run"],
+    "cwd": "$ZED_DIRNAME",
+    "reveal": "always",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "dotnet: test",
+    "command": "dotnet",
+    "args": ["test"],
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "reveal": "always",
+    "use_new_terminal": false
+  }
+]

@@ -1,0 +1,88 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "project_panel": {
+    "dock": "right"
+  },
+  "outline_panel": {
+    "dock": "right"
+  },
+  "collaboration_panel": {
+    "dock": "right"
+  },
+  "agent": {
+    "dock": "left",
+    "favorite_models": [],
+    "model_parameters": []
+  },
+  "git_panel": {
+    "dock": "right"
+  },
+  "toolbar": {
+    "code_actions": true
+  },
+  "auto_signature_help": true,
+  "telemetry": {
+    "diagnostics": true,
+    "metrics": false
+  },
+  "vim_mode": true,
+  "languages": {
+    "CSharp": {
+      "format_on_save": "on"
+    }
+  },
+  "lsp": {
+    "roslyn": {
+      "settings": {
+        "csharp|background_analysis": {
+          "dotnet_analyzer_diagnostics_scope": "openFiles",
+          "dotnet_compiler_diagnostics_scope": "openFiles"
+        },
+        "csharp|inlay_hints": {
+          "dotnet_enable_inlay_hints_for_parameters": true,
+          "csharp_enable_inlay_hints_for_types": true
+        }
+      }
+    }
+  },
+  "dap": {
+    "netcoredbg": {
+      "binary": "/Users/joe.cucci/.local/share/nvim/lazy/netcoredbg-macOS-arm64.nvim/netcoredbg/netcoredbg"
+    }
+  },
+  "icon_theme": {
+    "mode": "dark",
+    "light": "Zed (Default)",
+    "dark": "Zed (Default)"
+  },
+  "terminal": {
+    "font_size": 16.0
+  },
+  "base_keymap": "VSCode",
+  "relative_line_numbers": "enabled",
+  "gutter": {
+    "line_numbers": true
+  },
+  "minimap": {
+    "show": "never"
+  },
+  "buffer_font_family": "CaskaydiaCove NF",
+  "indent_guides": {
+    "enabled": false
+  },
+  "tab_size": 3,
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "Catppuccin Mocha (Blur)"
+  }
+}

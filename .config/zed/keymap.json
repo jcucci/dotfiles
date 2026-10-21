@@ -1,0 +1,28 @@
+[
+  {
+    "context": "Editor && vim_mode == normal && !VimWaiting && !menu",
+    "bindings": {
+      "space space": "file_finder::Toggle",
+      "space s g": "project_search::ToggleFocus",
+      "space e": "pane::RevealInProjectPanel",
+      "-": "pane::RevealInProjectPanel"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "space n b": ["task::Spawn", { "task_name": "dotnet: build" }],
+      "space n r": ["task::Spawn", { "task_name": "dotnet: run" }],
+      "space n t": ["task::Spawn", { "task_name": "dotnet: test" }]
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-l": "workspace::ActivatePaneRight"
+    }
+  }
+]

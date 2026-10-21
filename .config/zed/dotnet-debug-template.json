@@ -1,0 +1,26 @@
+// Template for .zed/debug.json — copy into an individual dotnet repo (e.g.
+// ~/projects/sharp/<repo>/.zed/debug.json) and adjust the paths below to
+// match that repo's actual project name, target framework, and dev port.
+// Mirrors the "Launch DLL" / "Attach to process" configs from nvim-dap.
+[
+  {
+    "label": "Launch DLL",
+    "adapter": "netcoredbg",
+    "request": "launch",
+    "program": "${ZED_WORKTREE_ROOT}/bin/Debug/net8.0/<ProjectName>.dll",
+    "cwd": "${ZED_WORKTREE_ROOT}",
+    "env": {
+      "ASPNETCORE_ENVIRONMENT": "Development"
+    },
+    "build": {
+      "command": "dotnet",
+      "args": ["build"]
+    }
+  },
+  {
+    "label": "Attach to process",
+    "adapter": "netcoredbg",
+    "request": "attach",
+    "processId": null
+  }
+]

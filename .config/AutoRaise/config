@@ -1,0 +1,5 @@
+delay=3
+pollMillis=50
+warpX=0
+warpY=0
+disableKey="control"
