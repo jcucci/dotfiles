@@ -1,0 +1,22 @@
+#!/bin/bash
+# Ensure PATH includes homebrew
+export PATH="/opt/homebrew/bin:$PATH"
+# Switch to or create k8s session with kubectl proxy running
+#
+# If k8s session exists -> switch to it
+# Otherwise -> create session with kubectl proxy in first pane, shell in second
+
+SESSION_NAME="k8s"
+
+if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+    tmux switch-client -t "$SESSION_NAME"
+else
+    # Create new session with kubectl proxy in first pane
+    tmux new-session -d -s "$SESSION_NAME" -c "$HOME" "kubectl proxy"
+    # Split and create a working shell
+    tmux split-window -t "$SESSION_NAME" -v -c "$HOME"
+    # Focus the shell pane (bottom)
+    tmux select-pane -t "$SESSION_NAME":1.2
+    # Switch to the new session
+    tmux switch-client -t "$SESSION_NAME"
+fi

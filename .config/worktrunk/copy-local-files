@@ -1,0 +1,22 @@
+#!/bin/bash
+# Copy small, git-ignored local files from the main checkout into the worktree
+# this runs in (a worktrunk pre-start hook; see config.toml).
+# Usage: copy-local-files <main-checkout-path>
+#
+# An allowlist rather than `wt step copy-ignored`, which copies everything ignored
+# (bin/, obj/, node_modules/) unless a .worktreeinclude exists in every repo.
+#
+#   .claude/         per-repo Claude settings.local.json (so permissions carry over)
+#   .env, .env.*     local environment files
+#   *.private.env.json   HTTP client private environments
+#   .vscode/         local editor settings
+#
+# Lock files are skipped and existing files are never overwritten.
+
+src="${1:?usage: copy-local-files <main-checkout-path>}"
+[ "$src" -ef "$PWD" ] && exit 0
+
+git -C "$src" ls-files -z --others --ignored --exclude-standard \
+        -- .claude .env '.env.*' '*.private.env.json' .vscode \
+    | grep -zv '\.lock$' \
+    | rsync -a --ignore-existing --from0 --files-from=- "$src/" ./

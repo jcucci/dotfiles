@@ -1,0 +1,24 @@
+#!/bin/bash
+# Wrapper script for gitmux with catppuccin icon color
+# Exits silently if not in a git repo
+
+dir="${1:-.}"
+
+# Check if directory is in a git repo
+if ! git -C "$dir" rev-parse --git-dir >/dev/null 2>&1; then
+    exit 0
+fi
+
+# Get gitmux output
+gitmux_output=$(/opt/homebrew/bin/gitmux -cfg "$HOME/.config/gitmux/gitmux.yml" "$dir")
+
+# If gitmux returns empty, exit
+if [[ -z "$gitmux_output" ]]; then
+    exit 0
+fi
+
+# Catppuccin mocha teal for icon
+icon_color="#94e2d5"
+
+# Output: teal icon + gitmux output + spacing
+echo "#[fg=${icon_color}]⎇ #[fg=default]${gitmux_output} "

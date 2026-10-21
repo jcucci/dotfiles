@@ -1,0 +1,99 @@
+#!/bin/bash
+# Ensure PATH includes homebrew
+export PATH="/opt/homebrew/bin:$PATH"
+# Create (or reuse) a worktrunk worktree and open it as a tmux window:
+# Claude Code on top, a shell below (same 35% split as tmux-toggle-bottom-pane).
+# Usage: tmux-worktree-new <branch> [start-dir] [base-branch] [prompt|-] [claude-flags]
+#   prompt        initial prompt for Claude ("-" reads it from stdin); omit to start empty
+#   claude-flags  extra flags for claude, e.g. "--permission-mode plan"
+#
+# The window is tagged with @wt_path / @wt_branch / @wt_repo so tmux-worktree-close
+# (and later the picker/status bar) can tell worktree windows from ordinary ones.
+
+BRANCH="$1"
+START_DIR="${2:-$PWD}"
+BASE="$3"
+PROMPT="$4"
+AGENT_FLAGS="$5"
+
+fail() {
+    tmux display-message "worktree: $1"
+    echo "worktree: $1" >&2
+    exit 1
+}
+
+[ -z "$BRANCH" ] && fail "branch name required"
+
+# Resolve the main checkout so this works from inside another worktree too
+COMMON_DIR=$(git -C "$START_DIR" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) \
+    || fail "$START_DIR is not in a git repo"
+REPO_ROOT=$(dirname "$COMMON_DIR")
+
+# Reuse the branch if it exists, otherwise create it
+ARGS=(switch --no-cd --format json)
+if git -C "$REPO_ROOT" show-ref --verify --quiet "refs/heads/$BRANCH"; then
+    ARGS+=("$BRANCH")
+else
+    ARGS+=(--create "$BRANCH")
+    [ -n "$BASE" ] && ARGS+=(--base "$BASE")
+fi
+
+ERR_FILE=$(mktemp)
+trap 'rm -f "$ERR_FILE"' EXIT
+if ! RESULT=$(wt -C "$REPO_ROOT" "${ARGS[@]}" 2>"$ERR_FILE"); then
+    # A repo's own .config/wt.toml hooks need one-time approval, which wt can't
+    # prompt for here. Review and approve them in a popup, then retry once.
+    if grep -q "needs approval" "$ERR_FILE"; then
+        tmux display-popup -E -w 80% -h 60% "wt -C '$REPO_ROOT' config approvals add"
+        RESULT=$(wt -C "$REPO_ROOT" "${ARGS[@]}" 2>"$ERR_FILE") \
+            || fail "project hooks not approved: $(head -c 200 "$ERR_FILE")"
+    else
+        fail "wt failed: $(head -c 200 "$ERR_FILE")"
+    fi
+fi
+WT_PATH=$(echo "$RESULT" | jq -r '.path // empty' | head -1)
+[ -z "$WT_PATH" ] && fail "could not read worktree path from wt output"
+
+# Claude account routing is keyed on $PWD (see zsh/claude.zsh). Refuse to open a
+# worktree that would route to a different account than its main checkout.
+account_for() {
+    case "$1/" in
+        "$HOME/projects/sharp/"*) echo work ;;
+        *) echo personal ;;
+    esac
+}
+if [ "$(account_for "$REPO_ROOT")" != "$(account_for "$WT_PATH")" ]; then
+    fail "$WT_PATH would use a different Claude account than $REPO_ROOT; fix worktree-path"
+fi
+
+# Window name: branch with the leading "features/" style prefix dropped, truncated
+NAME=${BRANCH##*/}
+NAME=${NAME:0:24}
+
+# Already open? Jump to it instead of creating a duplicate
+EXISTING=$(tmux list-windows -a -F '#{window_id} #{@wt_path}' | awk -v p="$WT_PATH" '$2==p{print $1; exit}')
+if [ -n "$EXISTING" ]; then
+    tmux switch-client -t "$EXISTING" 2>/dev/null
+    tmux select-window -t "$EXISTING"
+    exit 0
+fi
+
+# Command for the Claude pane. A seeded prompt goes through a temp file the pane's
+# shell reads and deletes, which sidesteps quoting it through tmux and the login shell.
+AGENT_CMD="${WT_AGENT_CMD:-claude${AGENT_FLAGS:+ $AGENT_FLAGS}}"
+if [ -n "$PROMPT" ]; then
+    PROMPT_FILE=$(mktemp)
+    if [ "$PROMPT" = "-" ]; then cat > "$PROMPT_FILE"; else printf '%s' "$PROMPT" > "$PROMPT_FILE"; fi
+    AGENT_CMD="$AGENT_CMD \"\$(cat $PROMPT_FILE; rm -f $PROMPT_FILE)\""
+fi
+
+WIN=$(tmux new-window -P -F '#{window_id}' -n "$NAME" -c "$WT_PATH" \
+    "exec $SHELL -l -i -c '$AGENT_CMD'")
+tmux set-option -w -t "$WIN" @wt_path "$WT_PATH"
+tmux set-option -w -t "$WIN" @wt_branch "$BRANCH"
+tmux set-option -w -t "$WIN" @wt_repo "$REPO_ROOT"
+tmux split-window -t "$WIN" -v -l 35% -c "$WT_PATH"
+# Claude fills the window; the shell pane stays hidden until you focus it
+# (Ctrl+a b, or moving down, unzooms automatically)
+tmux select-pane -t "$WIN".1
+tmux resize-pane -Z -t "$WIN".1

@@ -1,0 +1,21 @@
+#!/bin/bash
+# Ensure PATH includes homebrew
+export PATH="/opt/homebrew/bin:$PATH"
+# Status-bar summary of Claude agents across all sessions, e.g. "! 1 ✓ 2 ● 3".
+# Prints nothing when no agent has a known state. Counts only panes still running
+# claude, so stale options on a pane that has since exited are ignored.
+# Colours: red blocked, green done (waiting for you), yellow working.
+
+tmux list-panes -a -F '#{pane_current_command} #{@claude_state}' | awk '
+    $1 == "claude" {
+        if ($2 == "blocked") b++
+        else if ($2 == "done") d++
+        else if ($2 == "working") w++
+    }
+    END {
+        out = ""
+        if (b) out = out "#[fg=#f38ba8]! " b " "
+        if (d) out = out "#[fg=#a6e3a1]✓ " d " "
+        if (w) out = out "#[fg=#f9e2af]● " w " "
+        if (out != "") printf "%s#[fg=default]", out
+    }'

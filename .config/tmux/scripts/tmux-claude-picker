@@ -1,0 +1,81 @@
+#!/bin/bash
+# Ensure PATH includes homebrew
+export PATH="/opt/homebrew/bin:$PATH"
+# Claude Code agents across all tmux sessions.
+#   (no args)  fzf picker with a live preview of the agent's pane; Enter jumps to it
+#   --next     jump straight to the agent that has waited longest for you
+#              (blocked on a permission prompt first, then finished turns)
+#
+# State comes from the @claude_state / @claude_since pane options set by
+# ~/.claude/hooks/tmux-claude-state.sh. A pane running claude with no state yet
+# (started before the hook existed) shows as "unknown".
+
+now=$(date +%s)
+TAB=$'\t'
+
+age() {
+    local s=$(( now - $1 ))
+    if   [ "$s" -lt 60 ];    then echo "${s}s"
+    elif [ "$s" -lt 3600 ];  then echo "$(( s / 60 ))m"
+    else                          echo "$(( s / 3600 ))h$(( s % 3600 / 60 ))m"
+    fi
+}
+
+# Emit sorted TSV: sortkey, since, pane_id, target, pretty line
+# Pane/window/session fields are tab-separated; none can contain tabs.
+list_agents() {
+    local fmt="#{pane_id}${TAB}#{session_name}${TAB}#{window_index}${TAB}#{pane_index}${TAB}#{window_name}${TAB}#{pane_current_command}${TAB}#{pane_current_path}${TAB}#{@claude_state}${TAB}#{@claude_since}${TAB}#{@wt_branch}"
+    tmux list-panes -a -F "$fmt" | while IFS="$TAB" read -r pane sess widx pidx wname cmd path state since wtbranch; do
+        [ "$cmd" = "claude" ] || continue
+        # Stale options on a pane that no longer runs claude are ignored by the check above
+        local key label color
+        case "$state" in
+            blocked) key=0; label="blocked"; color=31 ;;
+            done)    key=1; label="done";    color=32 ;;
+            working) key=3; label="working"; color=33 ;;
+            *)       key=2; label="unknown"; color=90; since=$now ;;
+        esac
+        local branch="$wtbranch"
+        [ -z "$branch" ] && branch=$(git -C "$path" branch --show-current 2>/dev/null)
+        local line
+        line=$(printf '\033[%sm●\033[0m %-8s %5s  %-28s %s' \
+            "$color" "$label" "$(age "${since:-$now}")" "${sess}:${widx} ${wname}" "$branch")
+        printf '%s\t%s\t%s\t%s\t%s\n' "$key" "${since:-$now}" "$pane" "${sess}:${widx}.${pidx}" "$line"
+    done | sort -t"$TAB" -k1,1n -k2,2n
+}
+
+jump() {
+    local pane="$1" target="$2"
+    tmux switch-client -t "${target%%:*}" 2>/dev/null
+    tmux select-window -t "${target%.*}"
+    tmux select-pane -t "$pane"
+}
+
+case "${1:-}" in
+    --next)
+        current=$(tmux display-message -p '#{pane_id}')
+        # Only agents waiting on you (key 0 blocked, 1 done), never the pane you're on
+        pick=$(list_agents | awk -F'\t' -v cur="$current" '$1<=1 && $3!=cur {print; exit}')
+        if [ -z "$pick" ]; then
+            tmux display-message "No other Claude agents waiting"
+            exit 0
+        fi
+        IFS="$TAB" read -r _ _ pane target _ <<< "$pick"
+        jump "$pane" "$target"
+        ;;
+    *)
+        agents=$(list_agents)
+        if [ -z "$agents" ]; then
+            tmux display-message "No Claude agents running"
+            exit 0
+        fi
+        sel=$(echo "$agents" | fzf --ansi --delimiter="$TAB" --with-nth=5 \
+            --prompt="Claude> " --height=100% --border=rounded --no-sort \
+            --header="Enter: jump | blocked > done > working, oldest first" \
+            --preview='tmux capture-pane -ep -t {3} | grep -v "^$" | tail -30' \
+            --preview-window=right:55%)
+        [ -z "$sel" ] && exit 0
+        IFS="$TAB" read -r _ _ pane target _ <<< "$sel"
+        jump "$pane" "$target"
+        ;;
+esac

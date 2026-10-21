@@ -1,0 +1,29 @@
+#!/bin/bash
+# Ensure PATH includes homebrew
+export PATH="/opt/homebrew/bin:$PATH"
+# Toggle bottom pane - matches WezTerm behavior:
+# 1. Single pane -> create bottom split (25%)
+# 2. Multiple panes + on bottom pane -> go up and zoom
+# 3. Multiple panes + on top pane (zoomed or not) -> go down (unzooms automatically)
+
+PANE_COUNT=$(tmux list-panes | wc -l | tr -d ' ')
+
+if [ "$PANE_COUNT" = "1" ]; then
+  # Single pane: create bottom split
+  tmux split-window -v -l 35% -c "#{pane_current_path}"
+  exit 0
+fi
+
+# Multiple panes: check if we're on the bottom pane
+# Get current pane's top position and the maximum top position
+CURRENT_TOP=$(tmux display-message -p '#{pane_top}')
+MAX_TOP=$(tmux list-panes -F '#{pane_top}' | sort -n | tail -1)
+
+if [ "$CURRENT_TOP" = "$MAX_TOP" ]; then
+  # We're on the bottom pane: go up and zoom
+  tmux select-pane -U
+  tmux resize-pane -Z
+else
+  # We're on a top pane: go down (this auto-unzooms if zoomed)
+  tmux select-pane -D
+fi

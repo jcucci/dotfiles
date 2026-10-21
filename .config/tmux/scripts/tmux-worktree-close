@@ -1,0 +1,35 @@
+#!/bin/bash
+# Ensure PATH includes homebrew
+export PATH="/opt/homebrew/bin:$PATH"
+# Close a worktree window and remove its worktree via worktrunk.
+# Usage: tmux-worktree-close <window-id>
+#
+# Refuses (leaving the window open) if the worktree has uncommitted changes.
+# wt keeps the branch if it is unmerged, so unpushed work is never deleted here.
+
+WIN="$1"
+[ -z "$WIN" ] && exit 1
+
+WT_PATH=$(tmux show-options -wqv -t "$WIN" @wt_path)
+BRANCH=$(tmux show-options -wqv -t "$WIN" @wt_branch)
+REPO=$(tmux show-options -wqv -t "$WIN" @wt_repo)
+
+# Not a worktree window: behave like the old plain kill-window binding
+if [ -z "$WT_PATH" ]; then
+    tmux kill-window -t "$WIN"
+    exit 0
+fi
+
+if [ -n "$(git -C "$WT_PATH" status --porcelain 2>/dev/null)" ]; then
+    tmux display-message "worktree $BRANCH has uncommitted changes; commit or discard first"
+    exit 1
+fi
+
+# Close the window first so no shell is sitting inside the directory being removed,
+# then remove from the main checkout and report the outcome.
+tmux kill-window -t "$WIN"
+if OUT=$(wt -C "$REPO" remove "$BRANCH" --foreground --yes 2>&1); then
+    tmux display-message "worktree $BRANCH removed"
+else
+    tmux display-message "worktree $BRANCH not removed: $(echo "$OUT" | tail -1)"
+fi

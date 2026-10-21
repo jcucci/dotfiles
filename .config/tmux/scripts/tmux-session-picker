@@ -1,0 +1,89 @@
+#!/bin/bash
+# Ensure PATH includes homebrew
+export PATH="/opt/homebrew/bin:$PATH"
+# Session picker with zoxide integration
+# Shows existing tmux sessions + directories by default (sessions first)
+# - Pick existing session -> switch to it
+# - Pick directory -> create new session named after basename
+#
+# Format:
+#   session:<name>              — existing tmux session
+#   dir:<basename>:<fullpath>   — directory (basename used for fzf matching)
+#
+# Modes:
+#   (no args)    — launch fzf with sessions + dirs (called by tmux bind)
+#   --sessions   — output session lines to stdout (used by fzf reload)
+#   --all        — output sessions + directories to stdout (used by fzf reload)
+
+SELF="$0"
+
+list_sessions() {
+    tmux list-sessions -F "session:#{session_name}" 2>/dev/null
+}
+
+list_dirs() {
+    # Project directories
+    for base in "$HOME/projects" "$HOME/projects/sharp"; do
+        if [ -d "$base" ]; then
+            for dir in "$base"/*/; do
+                # Skip worktrunk worktree folders (<repo>-worktrees)
+                [[ "$dir" == *-worktrees/ ]] && continue
+                [ -d "$dir" ] && echo "dir:$(basename "${dir%/}"):${dir%/}"
+            done
+        fi
+    done
+
+    # Zoxide directories (excluding project dirs already listed)
+    zoxide query -l 2>/dev/null | grep -v "^${HOME}/projects" | head -30 | while read -r dir; do
+        echo "dir:$(basename "$dir"):$dir"
+    done
+}
+
+# Handle --sessions / --all flags (used by fzf reload)
+case "${1:-}" in
+    --sessions)
+        list_sessions
+        exit 0
+        ;;
+    --all)
+        list_sessions
+        list_dirs | sort -u
+        exit 0
+        ;;
+esac
+
+# Default: launch fzf with sessions + directories (sessions first)
+SELECTION=$({ list_sessions; list_dirs | sort -u; } | fzf \
+    --prompt="All> " \
+    --header="ctrl-s: sessions only | ctrl-d: show all" \
+    --delimiter=: --nth=2 \
+    --tiebreak=index \
+    --height=80% \
+    --border=rounded \
+    --bind "ctrl-s:reload($SELF --sessions)+change-prompt(Sessions> )" \
+    --bind "ctrl-d:reload($SELF --all)+change-prompt(All> )")
+
+# Exit if no selection
+[ -z "$SELECTION" ] && exit 0
+
+if [[ "$SELECTION" == session:* ]]; then
+    # Switch to existing session
+    SESSION_NAME="${SELECTION#session:}"
+    tmux switch-client -t "$SESSION_NAME"
+elif [[ "$SELECTION" == dir:* ]]; then
+    # Create new session from directory (format: dir:basename:fullpath)
+    DIR="${SELECTION#dir:}"
+    SESSION_NAME="${DIR%%:*}"
+    DIR="${DIR#*:}"
+
+    # Sanitize session name (replace dots and colons with underscores)
+    SESSION_NAME=$(echo "$SESSION_NAME" | tr './:' '___')
+
+    # Check if session already exists (use = prefix for exact match)
+    if tmux has-session -t "=$SESSION_NAME" 2>/dev/null; then
+        tmux switch-client -t "=$SESSION_NAME"
+    else
+        tmux new-session -d -s "$SESSION_NAME" -c "$DIR"
+        tmux switch-client -t "$SESSION_NAME"
+    fi
+fi

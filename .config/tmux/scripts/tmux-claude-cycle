@@ -1,0 +1,28 @@
+#!/bin/bash
+# Ensure PATH includes homebrew
+export PATH="/opt/homebrew/bin:$PATH"
+# Cycle through the windows in the current session that have a claude pane.
+# Usage: tmux-claude-cycle next|prev
+# Wraps around. From a window without claude, jumps to the nearest one in that direction.
+
+dir="${1:-next}"
+cur=$(tmux display-message -p '#{window_index}')
+
+wins=$(tmux list-panes -s -F '#{window_index} #{pane_current_command}' \
+    | awk '$2 == "claude" {print $1}' | sort -un)
+
+if [ -z "$wins" ]; then
+    tmux display-message "No Claude windows in this session"
+    exit 0
+fi
+
+if [ "$dir" = "prev" ]; then
+    target=$(echo "$wins" | awk -v c="$cur" '$1 < c {t = $1} END {print t}')
+    [ -z "$target" ] && target=$(echo "$wins" | tail -1)
+else
+    target=$(echo "$wins" | awk -v c="$cur" '$1 > c {print; exit}')
+    [ -z "$target" ] && target=$(echo "$wins" | head -1)
+fi
+
+[ "$target" = "$cur" ] && exit 0
+tmux select-window -t ":$target"

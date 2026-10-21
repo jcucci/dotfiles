@@ -1,0 +1,36 @@
+#!/bin/bash
+# Ensure PATH includes homebrew
+export PATH="/opt/homebrew/bin:$PATH"
+# Toggle between a singleton app window and the previous window
+# Usage: tmux-toggle-app <window-name> <command>
+#
+# If currently on the app window -> switch to previous window
+# If app window exists -> switch to it
+# If app window doesn't exist -> create it with the command
+
+WINDOW_NAME="$1"
+COMMAND="$2"
+
+if [ -z "$WINDOW_NAME" ] || [ -z "$COMMAND" ]; then
+    tmux display-message "Usage: tmux-toggle-app <window-name> <command>"
+    exit 1
+fi
+
+# Get current window name
+CURRENT_WINDOW=$(tmux display-message -p '#W')
+
+# Check if we're already on the target window
+if [ "$CURRENT_WINDOW" = "$WINDOW_NAME" ]; then
+    # Switch to previous window
+    tmux last-window 2>/dev/null || tmux select-window -t 1
+    exit 0
+fi
+
+# Check if window exists
+if tmux list-windows -F '#W' | grep -q "^${WINDOW_NAME}$"; then
+    # Window exists, switch to it
+    tmux select-window -t "$WINDOW_NAME"
+else
+    # Create new window with the command (via login shell for proper PATH)
+    tmux new-window -n "$WINDOW_NAME" -c "#{pane_current_path}" "exec $SHELL -l -i -c '$COMMAND'"
+fi

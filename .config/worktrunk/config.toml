@@ -1,0 +1,9 @@
+# Worktrees live beside the repo as <repo>-worktrees/<branch>. Deriving the path
+# from repo_path keeps Sharp worktrees under ~/projects/sharp/, which the claude()
+# wrapper in zsh/claude.zsh relies on to pick the enterprise account.
+worktree-path = "{{ repo_path }}/../{{ repo }}-worktrees/{{ branch | sanitize }}"
+
+# Blocking, so settings.local.json etc. exist before Claude launches in the new worktree.
+# Allowlist copy of small ignored files; see the script for what it includes and why.
+[pre-start]
+local-files = "~/.config/worktrunk/copy-local-files '{{ repo_path }}'"

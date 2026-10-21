@@ -41,14 +41,21 @@ zstyle ':fzf-tab:complete:z:*' fzf-preview 'eza -la --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza -la --color $realpath'
 
 export ASPNETCORE_ENVIRONMENT=Development
-export DOTNET_ROOT=/usr/share/dotnet
-export PATH=$PATH:/home/jcucci/.dotnet/tools
+# Auto-detect DOTNET_ROOT based on OS
+if [ -d "/usr/local/share/dotnet" ]; then
+    export DOTNET_ROOT=/usr/local/share/dotnet
+elif [ -d "/usr/share/dotnet" ]; then
+    export DOTNET_ROOT=/usr/share/dotnet
+fi
+export PATH=$PATH:$HOME/.dotnet/tools
 export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
 export PATH=$PATH:$DOTNET_ROOT/azure-functions-cli
 export PATH=$PATH:$HOME/apps/hawk-4.1.0
+export PATH=$PATH:$HOME/.local/bin
 export PATH=$PATH:$HOME/.npm-global/bin
 export NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED="true"
-export MSBuildSDKsPath=/usr/share/dotnet/sdk/$(dotnet --version)/Sdks
+# Use DOTNET_ROOT to set MSBuildSDKsPath dynamically
+export MSBuildSDKsPath=$DOTNET_ROOT/sdk/$(dotnet --version)/Sdks
 export VISUAL="nvim"
 export EDITOR="nvim"
 export XDG_DATA_DIRS="/usr/local/share:/usr/share"
@@ -56,8 +63,11 @@ export MOZ_ENABLE_WAYLAND=1
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+export NVM_DIR="$HOME/.nvm"
+  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
 # general
-alias claude="/home/jcucci/.claude/local/claude"
 alias ls='eza --color --oneline'
 alias la='eza -la --color --icons'
 alias cls='clear'
@@ -65,6 +75,9 @@ alias zsource='source ~/.config/zsh/.zshrc'
 alias wineclip='wl-paste -t text -w xclip -selection clipboard'
 alias cat='bat'
 alias ff='fastfetch'
+alias oc="opencode"
+alias weavr="$HOME/projects/weavr/target/debug/weavr"
+alias ns="$HOME/projects/nimbus-station/src/NimbusStation.Cli/bin/Debug/net10.0/ns"
 
 untar() {
     tar -xvzf $1
@@ -89,17 +102,27 @@ source_env_file() {
 }
 
 ninjasource() {
-    source_env_file '/home/jcucci/.config/zsh/ninja.env'
+    source_env_file "$HOME/.config/zsh/ninja.env"
 }
 
-source_env_file '/home/jcucci/.config/zsh/dev.env'
+ninjatestsource() {
+    source_env_file "$HOME/.config/zsh/ninja-api-tests.env"
+}
+
+source_env_file $HOME/.config/zsh/dev.env
 [ -f ~/.config/zsh/azure.zsh ] && source ~/.config/zsh/azure.zsh
 [ -f ~/.config/zsh/claude.zsh ] && source ~/.config/zsh/claude.zsh
 [ -f ~/.config/zsh/dotnet.zsh ] && source ~/.config/zsh/dotnet.zsh
 [ -f ~/.config/zsh/docker.zsh ] && source ~/.config/zsh/docker.zsh
 [ -f ~/.config/zsh/git.zsh ] && source ~/.config/zsh/git.zsh
+[ -f ~/.config/zsh/jj.zsh ] && source ~/.config/zsh/jj.zsh
 [ -f ~/.config/zsh/kubernetes.zsh ] && source ~/.config/zsh/kubernetes.zsh
+[ -f ~/.config/zsh/worktree.zsh ] && source ~/.config/zsh/worktree.zsh
+[ -f ~/.config/zsh/android.zsh ] && source ~/.config/zsh/android.zsh
 
 eval "$(fzf --zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
+. "$HOME/.cargo/env"
+
+source <(kubectl completion zsh)

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Print the Claude account (work org name / "Personal") used by the claude
+# instance running in the given tmux session. Empty output if none is running.
+set -euo pipefail
+# The tmux server's PATH may not include Homebrew, where the tmux binary lives;
+# ensure it (and jq) are reachable when invoked from the status bar via #().
+export PATH="/opt/homebrew/bin:$PATH"
+session="${1:-}"
+[ -z "$session" ] && exit 0
+
+color_work="#fab387"      # catppuccin peach
+color_personal="#89b4fa"  # catppuccin blue
+icon=$(printf '\363\260\232\251')  # nerd-font robot glyph (U+F06A9, nf-md-robot)
+
+config_dir=""
+while IFS= read -r tty; do
+  short=${tty#/dev/}
+  cpid=$(ps -t "$short" -o pid=,comm= 2>/dev/null | awk '$2=="claude"{print $1; exit}')
+  [ -z "$cpid" ] && continue
+  cfg=$(ps eww -o command= -p "$cpid" 2>/dev/null | tr ' ' '\n' \
+        | sed -n 's/^CLAUDE_CONFIG_DIR=//p' | head -1)
+  # claude is running on this tty; if the wrapper didn't set the var, Claude
+  # defaults to ~/.claude (work).
+  config_dir="${cfg:-$HOME/.claude}"
+  break
+done < <(tmux list-panes -t "$session" -F '#{pane_tty}' 2>/dev/null)
+
+[ -z "$config_dir" ] && exit 0
+
+case "$config_dir" in
+  *.claude-personal)
+    label="Personal"; color="$color_personal" ;;
+  *)
+    label=$(jq -r '.oauthAccount.organizationName // "Work"' \
+            "$config_dir/.claude.json" 2>/dev/null)
+    [ -z "$label" ] && label="Work"
+    color="$color_work" ;;
+esac
+
+printf '#[fg=%s]%s #[fg=default]%s ' "$color" "$icon" "$label"
