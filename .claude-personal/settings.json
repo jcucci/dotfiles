@@ -1,0 +1,242 @@
+{
+  "env": {
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "allow": [
+      "mcp__ref__*",
+      "mcp__dotnet-sherlock__",
+      "mcp__dotnet-sherlock__*",
+      "mcp__atlassian__*",
+      "mcp__fetch__*",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git status:*)",
+      "Bash(git show:*)",
+      "Bash(git fetch:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)",
+      "Bash(jj diff:*)",
+      "Bash(jj log:*)",
+      "Bash(jj status:*)",
+      "Bash(jj show:*)",
+      "Bash(jj git fetch:*)",
+      "Bash(jj bookmark list:*)",
+      "Bash(jj evolog:*)",
+      "Bash(jj op log:*)",
+      "Bash(jj root:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet build:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh repo view:*)",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf /*:*)",
+      "Bash(rm -fr /:*)",
+      "Bash(rm -fr /*:*)",
+      "Bash(rm -rf ~:*)",
+      "Bash(rm -rf ~/:*)",
+      "Bash(rm -rf ~/*:*)",
+      "Bash(rm -fr ~:*)",
+      "Bash(rm -fr ~/:*)",
+      "Bash(rm -fr ~/*:*)",
+      "Bash(rm -rf .:*)",
+      "Bash(rm -rf ..:*)",
+      "Bash(rm -fr .:*)",
+      "Bash(rm -fr ..:*)",
+      "Bash(sudo:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(dd:*)",
+      "Bash(mkfs:*)",
+      "Bash(fdisk:*)",
+      "Bash(chmod 777:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(truncate:*)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/secrets/**)",
+      "Read(**/*.key)",
+      "Read(**/*.pem)",
+      "Read(**/*.pfx)",
+      "Read(**/*.p12)",
+      "Read(**/id_rsa*)",
+      "Read(**/id_ed25519*)",
+      "Read(**/credentials.json)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.gnupg/**)",
+      "Read(~/.netrc)",
+      "Read(~/.npmrc)",
+      "Read(~/.docker/config.json)",
+      "Write(.env)",
+      "Write(.env.*)",
+      "Write(**/secrets/**)",
+      "Write(~/.ssh/**)",
+      "Write(~/.aws/**)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git add:*)",
+      "Bash(jj git push:*)",
+      "Bash(jj commit:*)",
+      "Bash(jj describe:*)",
+      "Bash(jj new:*)",
+      "Bash(jj bookmark set:*)",
+      "Bash(jj bookmark create:*)",
+      "Bash(jj bookmark move:*)",
+      "Bash(jj rebase:*)",
+      "Bash(jj squash:*)",
+      "Bash(jj edit:*)",
+      "Bash(jj absorb:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)"
+    ],
+    "defaultMode": "auto",
+    "additionalDirectories": [
+      "~/.config",
+      "~/projects"
+    ]
+  },
+  "model": "sonnet",
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/brainstall.sh"
+          },
+          {
+            "type": "command",
+            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/tmux-claude-state.sh notify"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/brainstall-clear.sh"
+          },
+          {
+            "type": "command",
+            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/tmux-claude-state.sh working"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/brainstall-clear.sh"
+          },
+          {
+            "type": "command",
+            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/tmux-claude-state.sh working"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/brainstall-clear.sh"
+          },
+          {
+            "type": "command",
+            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/tmux-claude-state.sh done"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/brainstall-clear.sh"
+          },
+          {
+            "type": "command",
+            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/tmux-claude-state.sh clear"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "/bin/bash /Users/joe.cucci/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "sherlock@dotnet-sherlock-mcp": true
+  },
+  "extraKnownMarketplaces": {
+    "dotnet-sherlock-mcp": {
+      "source": {
+        "source": "github",
+        "repo": "jcucci/dotnet-sherlock-mcp"
+      }
+    }
+  },
+  "theme": "dark",
+  "editorMode": "vim",
+  "autoMode": {
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: Public — jcucci/dotnet-sherlock-mcp (github.com)",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: None configured — CI secret referenced by name only: NUGET_USER (deploy key exists, value not known)",
+      "**Default / protected branches**: main (default). Rulesets: `default` (disabled). No classic branch protection listed — ruleset is disabled, not substituting protection",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine with open internet",
+      "**Source control**: The trusted repo (jcucci/dotnet-sherlock-mcp) and its origin remote (https://github.com/jcucci/dotnet-sherlock-mcp.git) only",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured — public NuGet (api.nuget.org) used for package restore",
+      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development (.NET MCP server for assembly introspection)",
+      "**Trusted repo**: /Users/joe.cucci/projects/dotnet-sherlock-mcp (origin: https://github.com/jcucci/dotnet-sherlock-mcp.git) — public repo; since it's public, only this repo's own work belongs in it, not content ported in from elsewhere",
+      "**Org-specific CLIs**: None configured — routine CLIs observed: dotnet, dnx (standard .NET toolchain, not org-specific)"
+    ]
+  }
+}
