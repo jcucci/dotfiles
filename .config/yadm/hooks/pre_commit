@@ -1,0 +1,38 @@
+#!/bin/bash
+# yadm pre_commit guard: refuse to commit credentials to a PUBLIC dotfiles repo.
+# yadm runs this before every `yadm commit`; a non-zero exit aborts the commit.
+#
+# Checks what is staged, not what is in the working tree:
+#   1. file paths that are credential/state files by nature
+#   2. added lines that look like secrets
+# Both lists are deliberately blunt. A false positive costs one `yadm reset`;
+# a false negative is a secret in public history. Bypassing (`--no-verify`) is on you.
+
+# This file holds the patterns it blocks, so it must not scan itself
+SELF=".config/yadm/hooks/pre_commit"
+
+BAD_PATHS='(^|/)(\.env(\..*)?|.*\.env|.*\.pem|.*\.p12|.*\.pfx|.*\.key|id_(rsa|dsa|ecdsa|ed25519)(\.pub)?|\.ssh/.*|\.netrc|\.npmrc|\.git-credentials|.*_history|history|\.zsh_sessions/.*|hosts\.yml|auth\.(json|db.*)|apps\.json|token\.json|.*credentials.*|settings\.local\.json|[Nn]u[Gg]et\.[Cc]onfig|approvals\.toml|node_modules/.*|.*\.lock|\.claude\.json)$'
+
+BAD_CONTENT='(-----BEGIN [A-Z ]*PRIVATE KEY|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{32,}|xox[abprs]-[A-Za-z0-9-]{20,}|(token|api[_-]?key|apikey|secret|passw(or)?d|bearer|access[_-]?key)["'"'"']?[[:space:]]*[=:][[:space:]]*["'"'"']?[A-Za-z0-9+/_.=-]{20,})'
+
+fail=0
+while IFS= read -r -d '' f; do
+    [ "$f" = "$SELF" ] && continue
+    if [[ "$f" =~ $BAD_PATHS ]]; then
+        echo "BLOCKED (credential-type path): $f" >&2
+        fail=1
+        continue
+    fi
+    hits=$(git diff --cached -U0 --no-color -- "$f" | grep -E '^\+[^+]' | grep -E -i "$BAD_CONTENT" | wc -l | tr -d ' ')
+    if [ "$hits" -gt 0 ]; then
+        echo "BLOCKED (looks like a secret, $hits line(s)): $f" >&2
+        fail=1
+    fi
+done < <(git diff --cached --name-only --diff-filter=ACM -z)
+
+if [ "$fail" -ne 0 ]; then
+    echo "" >&2
+    echo "Commit aborted. Unstage with: yadm reset -q -- <path>" >&2
+    echo "If a hit is a false positive, review it by hand before using --no-verify." >&2
+    exit 1
+fi
