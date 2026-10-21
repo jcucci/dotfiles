@@ -1,12 +1,106 @@
 alias dnpack='dotnet pack -c RELEASE'
 alias csr='csharprepl --useTerminalPaletteTheme'
 
+_sharpfm_curl() {
+    local url="$1"
+    local response http_code body msg
+    response=$(curl -s -w $'\n%{http_code}' \
+        --header "Accept: application/json" \
+        --header "Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64 -w 0)" \
+        "$url")
+    http_code="${response##*$'\n'}"
+    body="${response%$'\n'*}"
+
+    if [ "$http_code" = "200" ]; then
+        printf '%s' "$body"
+        return 0
+    fi
+
+    if echo "$body" | grep -q "Personal Access Token used has expired"; then
+        echo "Error: AZURE_DEVOPS_PAT has expired. Refresh it in ~/.config/zsh/dev.env and re-source your shell." >&2
+    else
+        msg=$(echo "$body" | jq -r '.message // empty' 2>/dev/null)
+        echo "Error: sharpfm feed returned HTTP $http_code${msg:+: $msg}" >&2
+    fi
+    return 1
+}
+
+_dn_find_solution() {
+    local solutions=()
+
+    # Search current directory (non-recursive)
+    solutions+=(*.sln(N) *.slnx(N))
+
+    # Search src/ directory if it exists
+    if [[ -d "src" ]]; then
+        solutions+=(src/*.sln(N) src/*.slnx(N))
+    fi
+
+    # If none found, return error
+    if [[ ${#solutions[@]} -eq 0 ]]; then
+        echo "Error: No solution file found in current directory or src/" >&2
+        return 1
+    fi
+
+    # If exactly one, return it
+    if [[ ${#solutions[@]} -eq 1 ]]; then
+        echo "${solutions[1]}"
+        return 0
+    fi
+
+    # Multiple found - filter out Api.Tests
+    local filtered=()
+    for sln in "${solutions[@]}"; do
+        if [[ ! "$sln" == *"Api.Tests"* ]]; then
+            filtered+=("$sln")
+        fi
+    done
+
+    # If filtering leaves exactly one, use it
+    if [[ ${#filtered[@]} -eq 1 ]]; then
+        echo "${filtered[1]}"
+        return 0
+    fi
+
+    # If all were filtered out, fall back to original list
+    if [[ ${#filtered[@]} -eq 0 ]]; then
+        filtered=("${solutions[@]}")
+    fi
+
+    # Multiple remain - interactive prompt
+    echo "Multiple solution files found:" >&2
+    local i=1
+    for sln in "${filtered[@]}"; do
+        echo "  $i) $sln" >&2
+        ((i++))
+    done
+
+    echo -n "Select [1-${#filtered[@]}]: " >&2
+    read choice
+
+    if [[ "$choice" =~ ^[0-9]+$ ]] && [[ "$choice" -ge 1 ]] && [[ "$choice" -le ${#filtered[@]} ]]; then
+        echo "${filtered[$choice]}"
+        return 0
+    else
+        echo "Invalid selection" >&2
+        return 1
+    fi
+}
+
 dntest() {
-    dotnet test $1 -v q --nologo --filter=Category!=Integration
+    local target="$1"
+    if [[ -z "$target" ]]; then
+        target=$(_dn_find_solution) || return 1
+    fi
+    dotnet test "$target" -v q --nologo --filter=Category!=Integration
 }
 
 dnbuild() {
-    dotnet build $1 -v q --nologo
+    local target="$1"
+    if [[ -z "$target" ]]; then
+        target=$(_dn_find_solution) || return 1
+    fi
+    dotnet build "$target" -v q --nologo
 }
 
 dnpush() {
@@ -42,15 +136,13 @@ dnversions() {
             echo "Error: AZURE_DEVOPS_PAT environment variable not set"
             return 1
         fi
-        
-        curl -s \
-        --header "Accept: application/json" \
-        --header "Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64 -w 0)" \
-        "https://sharpfm.pkgs.visualstudio.com/_packaging/64eacba0-4a33-4524-a207-22b9304801fa/nuget/v3/query2/?q=$package_name&prerelease=false" | \
-        jq --arg pkg "$package_name" '.data[] | select(.id | ascii_downcase == ($pkg | ascii_downcase)) | {name: .id, versions: (.versions | sort_by(.) | reverse | .[0:8])}'
+
+        local body
+        body=$(_sharpfm_curl "https://sharpfm.pkgs.visualstudio.com/_packaging/64eacba0-4a33-4524-a207-22b9304801fa/nuget/v3/query2/?q=$package_name&prerelease=false") || return 1
+        echo "$body" | jq --arg pkg "$package_name" '.data[] | select(.id | ascii_downcase == ($pkg | ascii_downcase)) | {name: .id, versions: (.versions | map(.version) | sort_by(split(".") | map(tonumber? // .)) | reverse | .[0:8])}'
     else
         curl -s "https://api-v2v3search-0.nuget.org/query?q=$package_name&prerelease=false" | \
-        jq --arg pkg "$package_name" '.data[] | select(.id | ascii_downcase == ($pkg | ascii_downcase)) | {name: .id, versions: (.versions | sort_by(.) | reverse | .[0:8])}'
+        jq --arg pkg "$package_name" '.data[] | select(.id | ascii_downcase == ($pkg | ascii_downcase)) | {name: .id, versions: (.versions | map(.version) | sort_by(split(".") | map(tonumber? // .)) | reverse | .[0:8])}'
     fi
 }
 
@@ -83,12 +175,10 @@ dnsearch() {
             echo "Error: AZURE_DEVOPS_PAT environment variable not set"
             return 1
         fi
-        
-        curl -s \
-        --header "Accept: application/json" \
-        --header "Authorization: Basic $(echo -n ":$AZURE_DEVOPS_PAT" | base64 -w 0)" \
-        "https://sharpfm.pkgs.visualstudio.com/_packaging/64eacba0-4a33-4524-a207-22b9304801fa/nuget/v3/query2/?q=$package_name&prerelease=true" | \
-        jq '[.data[] | {name: .id, version: .version}]'
+
+        local body
+        body=$(_sharpfm_curl "https://sharpfm.pkgs.visualstudio.com/_packaging/64eacba0-4a33-4524-a207-22b9304801fa/nuget/v3/query2/?q=$package_name&prerelease=true") || return 1
+        echo "$body" | jq '[.data[] | {name: .id, version: .version}]'
     else
         # Public NuGet search
         curl -s "https://api-v2v3search-0.nuget.org/query?q=$package_name&prerelease=false" | \
@@ -99,24 +189,20 @@ dnsearch() {
 dncover() {
     # Check if reportgenerator tool is available, install if not
     command -v reportgenerator >/dev/null || { echo "Installing reportgenerator..."; dotnet tool install -g dotnet-reportgenerator-globaltool; }
-    
+
     if [ $? -ne 0 ]; then
         echo "Error: Failed to install reportgenerator tool"
         return 1
     fi
-    
-    if [ -z "$1" ]; then
-        echo "Usage: dncover <solution_or_project_path>"
-        echo "  Runs dotnet test with code coverage collection and generates HTML report"
-        echo "  Excludes integration tests and opens coverage report in browser"
+
+    local target="$1"
+    if [[ -z "$target" ]]; then
+        target=$(_dn_find_solution) || return 1
+    elif [ ! -f "$target" ] && [ ! -d "$target" ]; then
+        echo "Error: Path '$target' does not exist"
         return 1
     fi
-    
-    if [ ! -f "$1" ] && [ ! -d "$1" ]; then
-        echo "Error: Path '$1' does not exist"
-        return 1
-    fi
-    
+
     local coverage_dir=".coverage"
     
     echo "Setting up coverage directory..."
@@ -127,7 +213,7 @@ dncover() {
     fi
     
     echo "Running tests with code coverage..."
-    dotnet test "$1" -v q --nologo --filter=Category!=Integration --collect:"XPlat Code Coverage" --results-directory:"./$coverage_dir"
+    dotnet test "$target" -v q --nologo --filter=Category!=Integration --collect:"XPlat Code Coverage" --results-directory:"./$coverage_dir"
     
     if [ $? -ne 0 ]; then
         echo "Error: Test execution failed"
@@ -203,4 +289,10 @@ dnupdate() {
     if [ $failed_count -gt 0 ]; then
         return 1
     fi
+}
+
+dnoutdated() {
+  echo "Updating all .NET package references"
+
+  dotnet outdated -u:Prompt $1
 }

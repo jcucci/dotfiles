@@ -1,6 +1,59 @@
-background = #000000
-background-opacity = 0.85
+# =============================================================================
+# Ghostty Configuration - Migrated from WezTerm
+# =============================================================================
+
+# Theme (Catppuccin Mocha - matches WezTerm)
+theme = Catppuccin Mocha
+
+# Font (same as WezTerm)
 font-family = CaskaydiaCove Nerd Font
-font-size = 12
-theme = catppuccin-mocha
-window-decoration = false
+font-size = 15
+
+# Cursor (blinking bar, blue color)
+cursor-style = bar
+cursor-style-blink = true
+cursor-color = 89b4fa
+
+# Window appearance
+macos-titlebar-style = hidden
+window-padding-x = 8
+window-padding-y = 8
+background-opacity = 0.9
+background-blur-radius = 40
+
+# Behavior
+confirm-close-surface = false
+window-inherit-font-size = false
+macos-option-as-alt = true
+shell-integration = detect
+
+# Auto-start tmux (attach to existing or create new "main" session)
+command = /opt/homebrew/bin/tmux new-session -A -s main
+
+# =============================================================================
+# Keybinds - Only terminal-level actions (tmux handles the rest)
+# =============================================================================
+
+# Copy/Paste (Ghostty level, works with tmux copy mode too)
+keybind = cmd+c=copy_to_clipboard
+keybind = cmd+v=paste_from_clipboard
+
+# Scrolling (Ghostty scrollback, though tmux has its own)
+keybind = shift+page_up=scroll_page_up
+keybind = shift+page_down=scroll_page_down
+
+# Font size
+keybind = cmd+plus=increase_font_size:1
+keybind = cmd+minus=decrease_font_size:1
+keybind = cmd+zero=reset_font_size
+
+# Quick terminal (global hotkey)
+keybind = global:ctrl+`=toggle_quick_terminal
+quick-terminal-position = top
+quick-terminal-screen = main
+
+# Send special sequences
+keybind = shift+enter=text:\x1b\r
+
+# Toggle bottom pane (sends Ctrl+a b to tmux)
+keybind = shift+escape=text:\x01b

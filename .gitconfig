@@ -3,12 +3,12 @@
 	email = jcucci@fastmail.com
 [credential "https://github.com"]
 	helper = 
-	helper = !/usr/bin/gh auth git-credential
+	helper = !/opt/homebrew/bin/gh auth git-credential
 [credential "https://gist.github.com"]
 	helper = 
-	helper = !/usr/bin/gh auth git-credential
+	helper = !/opt/homebrew/bin/gh auth git-credential
 [core]
-    pager = delta
+    pager = delta --dark --line-numbers
 [interactive]
     diffFilter = delta --color-only
 [alias]
@@ -16,7 +16,7 @@
 	last = log -1 HEAD
 	unstage = reset HEAD --
 [include]
-    path = /home/jcucci/projects/system/catppuccin/delta/catppuccin.gitconfig
+    path = /Users/joe.cucci/projects/system/catppuccin/delta/catppuccin.gitconfig
 [delta]
     features = catppuccin-mocha
     navigate = true
@@ -24,5 +24,13 @@
     line-numbers = true
 [merge]
     conflictstyle = zdiff3
+	tool = nvimdiff
 [pull]
 	rebase = false
+[mergetool "nvimdiff"]
+	layout = LOCAL,REMOTE/MERGED
+[mergetool]
+	keepBackup = false
+	prompt = false
+[rerere]
+	enabled = true

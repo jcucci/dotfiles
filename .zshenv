@@ -1,1 +1,2 @@
-ZDOTDIR=/home/jcucci/.config/zsh
+ZDOTDIR="/Users/joe.cucci/.config/zsh"
+. "$HOME/.cargo/env"
