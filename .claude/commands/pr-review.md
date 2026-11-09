@@ -59,10 +59,32 @@ Make the changes. For build/test related fixes, verify locally before pushing.
 
 Commit message should summarize what was addressed (e.g., "Fix null check and rename per review feedback").
 
-Show: files changed, commit/change id, PR URL, any remaining unaddressed comments.
+### Reply and resolve (only after push succeeds)
+
+Once the fixes are agreed (AskUserQuestion), implemented, verified, **and pushed**, reply to and resolve each thread whose feedback was addressed in that push. Do this automatically; no extra confirmation is needed since the user already agreed to the changes.
+
+- Only threads the user chose to address, and whose change is in the pushed commit. Never reply to or resolve threads that were skipped, declined, or ambiguous; list those as remaining instead.
+- Reply text: one or two sentences saying what changed, referencing the short commit hash (e.g. "Fixed in 28490dde: moved the count log before the `Any()` check.").
+- **Question** comments the user answered: reply with the answer, then resolve only if the user said to.
+- If the push failed, do not reply or resolve anything.
+
+**Azure DevOps remote** (`dev.azure.com` in `git remote get-url origin`; `gh` will not work). Write JSON bodies to files in the scratchpad dir and use `--in-file`. Run each call explicitly (zsh does not word-split unquoted variables, so avoid `set -- $pair` style loops):
+
+```bash
+# list active threads (id + file) — project is the path segment after the org in the remote URL
+az devops invoke --area git --resource pullRequestThreads --route-parameters project=<project> repositoryId=<repo> pullRequestId=<id> --org https://dev.azure.com/<org> --api-version 7.1
+# reply: body {"content":"…","parentCommentId":1,"commentType":1}
+az devops invoke --area git --resource pullRequestThreadComments --route-parameters project=<project> repositoryId=<repo> pullRequestId=<id> threadId=<tid> --org … --api-version 7.1 --http-method POST --in-file reply.json
+# resolve: body {"status":"fixed"}
+az devops invoke --area git --resource pullRequestThreads --route-parameters … threadId=<tid> --org … --api-version 7.1 --http-method PATCH --in-file status.json
+```
+
+**GitHub remote**: reply with `gh api repos/{owner}/{repo}/pulls/<pr>/comments/<comment-id>/replies -f body=…`; resolve with the GraphQL `resolveReviewThread` mutation via `gh api graphql`.
+
+Show: files changed, commit/change id, PR URL, threads replied to and resolved, any remaining unaddressed comments.
 
 ## Notes
 
-- Don't resolve/dismiss review threads — let the reviewer do that.
+- Only reply to and resolve threads after the agreed change is pushed (see above). Never dismiss threads or resolve ones that were not addressed.
 - If a comment is ambiguous, flag it instead of guessing.
 - Call out CI failures that look unrelated to the PR changes (flaky tests, infra).

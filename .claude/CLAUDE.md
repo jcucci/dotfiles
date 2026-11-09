@@ -8,6 +8,6 @@
 
 ## Code Style
 
-- Prefer explicit types over var when type isn't obvious
+- Prefer `var` when the type is obvious from the right-hand side; use explicit types only when it isn't
 - Keep methods small and focused
 - Use async/await for I/O operations
