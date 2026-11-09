@@ -3,8 +3,10 @@
 export PATH="/opt/homebrew/bin:$PATH"
 # Claude Code agents across all tmux sessions.
 #   (no args)  fzf picker with a live preview of the agent's pane; Enter jumps to it
+#   --nth N    jump to the Nth agent in the sidebar's order (same sort as the picker)
 #   --next     jump straight to the agent that has waited longest for you
-#              (blocked on a permission prompt first, then finished turns)
+#              (blocked on a permission prompt first, then finished turns).
+#              Agents on hold (@claude_hold, Ctrl+a h) are skipped and sort last.
 #
 # State comes from the @claude_state / @claude_since pane options set by
 # ~/.claude/hooks/tmux-claude-state.sh. A pane running claude with no state yet
@@ -24,12 +26,16 @@ age() {
 # Emit sorted TSV: sortkey, since, pane_id, target, pretty line
 # Pane/window/session fields are tab-separated; none can contain tabs.
 list_agents() {
-    local fmt="#{pane_id}${TAB}#{session_name}${TAB}#{window_index}${TAB}#{pane_index}${TAB}#{window_name}${TAB}#{pane_current_command}${TAB}#{pane_current_path}${TAB}#{@claude_state}${TAB}#{@claude_since}${TAB}#{@wt_branch}"
-    tmux list-panes -a -F "$fmt" | while IFS="$TAB" read -r pane sess widx pidx wname cmd path state since wtbranch; do
+    local fmt="#{pane_id}${TAB}#{session_name}${TAB}#{window_index}${TAB}#{pane_index}${TAB}#{window_name}${TAB}#{pane_current_command}${TAB}#{pane_current_path}${TAB}#{?@claude_hold,1,0}${TAB}#{?@claude_state,#{@claude_state},-}${TAB}#{?@claude_since,#{@claude_since},-}${TAB}#{@wt_branch}"
+    tmux list-panes -a -F "$fmt" | while IFS="$TAB" read -r pane sess widx pidx wname cmd path hold state since wtbranch; do
         [ "$cmd" = "claude" ] || continue
         # Stale options on a pane that no longer runs claude are ignored by the check above
         local key label color
+        [ "$state" = "-" ] && state=""
+        [ "$since" = "-" ] && since=""
+        [ "$hold" = "1" ] && state="held"
         case "$state" in
+            held)    key=4; label="held";    color=90 ;;
             blocked) key=0; label="blocked"; color=31 ;;
             done)    key=1; label="done";    color=32 ;;
             working) key=3; label="working"; color=33 ;;
@@ -58,6 +64,15 @@ case "${1:-}" in
         pick=$(list_agents | awk -F'\t' -v cur="$current" '$1<=1 && $3!=cur {print; exit}')
         if [ -z "$pick" ]; then
             tmux display-message "No other Claude agents waiting"
+            exit 0
+        fi
+        IFS="$TAB" read -r _ _ pane target _ <<< "$pick"
+        jump "$pane" "$target"
+        ;;
+    --nth)
+        pick=$(list_agents | sed -n "${2:-1}p")
+        if [ -z "$pick" ]; then
+            tmux display-message "No Claude agent #${2:-1}"
             exit 0
         fi
         IFS="$TAB" read -r _ _ pane target _ <<< "$pick"

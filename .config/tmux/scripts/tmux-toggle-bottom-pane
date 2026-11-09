@@ -5,8 +5,22 @@ export PATH="/opt/homebrew/bin:$PATH"
 # 1. Single pane -> create bottom split (25%)
 # 2. Multiple panes + on bottom pane -> go up and zoom
 # 3. Multiple panes + on top pane (zoomed or not) -> go down (unzooms automatically)
+#
+# The Claude sidebar pane (@claude_sidebar) is ignored when counting panes. Zooming
+# would hide it, so in a window that has one "zoom" folds the bottom pane to a single
+# row instead, and going back down grows it again.
 
-PANE_COUNT=$(tmux list-panes | wc -l | tr -d ' ')
+REAL='#{!=:#{@claude_sidebar},1}'
+SIDEBAR='#{==:#{@claude_sidebar},1}'
+
+# Focus on the sidebar itself: hand focus back to the first real pane
+if [ "$(tmux display-message -p "$SIDEBAR")" = "1" ]; then
+  tmux select-pane -t "$(tmux list-panes -f "$REAL" -F '#{pane_id}' | head -1)"
+  exit 0
+fi
+
+PANE_COUNT=$(tmux list-panes -f "$REAL" | wc -l | tr -d ' ')
+HAS_SIDEBAR=$(tmux list-panes -f "$SIDEBAR" -F x)
 
 if [ "$PANE_COUNT" = "1" ]; then
   # Single pane: create bottom split
@@ -15,15 +29,22 @@ if [ "$PANE_COUNT" = "1" ]; then
 fi
 
 # Multiple panes: check if we're on the bottom pane
-# Get current pane's top position and the maximum top position
+# Get current pane's top position and the bottom-most pane (with its height)
 CURRENT_TOP=$(tmux display-message -p '#{pane_top}')
-MAX_TOP=$(tmux list-panes -F '#{pane_top}' | sort -n | tail -1)
+read -r MAX_TOP BOTTOM_ID BOTTOM_HEIGHT < <(tmux list-panes -f "$REAL" -F '#{pane_top} #{pane_id} #{pane_height}' | sort -n | tail -1)
 
 if [ "$CURRENT_TOP" = "$MAX_TOP" ]; then
-  # We're on the bottom pane: go up and zoom
+  # We're on the bottom pane: go up and zoom (or fold, with a sidebar)
   tmux select-pane -U
-  tmux resize-pane -Z
+  if [ -n "$HAS_SIDEBAR" ]; then
+    tmux resize-pane -t "$BOTTOM_ID" -y 1
+  else
+    tmux resize-pane -Z
+  fi
 else
   # We're on a top pane: go down (this auto-unzooms if zoomed)
   tmux select-pane -D
+  if [ -n "$HAS_SIDEBAR" ] && [ "$BOTTOM_HEIGHT" -le 2 ]; then
+    tmux resize-pane -t "$BOTTOM_ID" -y 35%
+  fi
 fi

@@ -3,6 +3,16 @@
 # Read JSON input from stdin
 input=$(cat)
 
+# Publish the session's running cost to the tmux pane for the Claude sidebar
+# (~/.config/tmux/scripts/tmux-claude-sidebar reads @claude_cost)
+if [ -n "$TMUX_PANE" ]; then
+  export PATH="/opt/homebrew/bin:$PATH"
+  session_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // empty')
+  if [ -n "$session_cost" ] && [ "$session_cost" != "$(tmux show-options -pqv -t "$TMUX_PANE" @claude_cost 2>/dev/null)" ]; then
+    tmux set-option -p -t "$TMUX_PANE" @claude_cost "$session_cost" 2>/dev/null
+  fi
+fi
+
 # Extract values from JSON
 model_name=$(echo "$input" | jq -r '.model.display_name')
 usage=$(echo "$input" | jq '.context_window.current_usage')

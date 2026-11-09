@@ -39,6 +39,7 @@ case "$mode" in
         cat >/dev/null
         tmux set-option -pu -t "$TMUX_PANE" @claude_state
         tmux set-option -pu -t "$TMUX_PANE" @claude_since
+        tmux set-option -pu -t "$TMUX_PANE" @claude_hold
         tmux set-option -wu -t "$TMUX_PANE" @claude_wstate
         refresh
         exit 0

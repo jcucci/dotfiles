@@ -92,8 +92,15 @@ WIN=$(tmux new-window -P -F '#{window_id}' -n "$NAME" -c "$WT_PATH" \
 tmux set-option -w -t "$WIN" @wt_path "$WT_PATH"
 tmux set-option -w -t "$WIN" @wt_branch "$BRANCH"
 tmux set-option -w -t "$WIN" @wt_repo "$REPO_ROOT"
-tmux split-window -t "$WIN" -v -l 35% -c "$WT_PATH"
+# Pane ids, not indexes: the Claude sidebar (if enabled) is another pane in the window
+CLAUDE_PANE=$(tmux display-message -p -t "$WIN" '#{pane_id}')
+SHELL_PANE=$(tmux split-window -P -F '#{pane_id}' -t "$CLAUDE_PANE" -v -l 35% -c "$WT_PATH")
 # Claude fills the window; the shell pane stays hidden until you focus it
-# (Ctrl+a b, or moving down, unzooms automatically)
-tmux select-pane -t "$WIN".1
-tmux resize-pane -Z -t "$WIN".1
+# (Ctrl+a b, or moving down, unzooms automatically). Zooming would hide the sidebar
+# too, so when one is present the shell is folded down to a single row instead.
+tmux select-pane -t "$CLAUDE_PANE"
+if [ -n "$(tmux list-panes -t "$WIN" -f '#{==:#{@claude_sidebar},1}' -F x)" ]; then
+    tmux resize-pane -t "$SHELL_PANE" -y 1
+else
+    tmux resize-pane -Z -t "$CLAUDE_PANE"
+fi

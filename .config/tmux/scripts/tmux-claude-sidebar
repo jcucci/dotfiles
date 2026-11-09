@@ -1,0 +1,171 @@
+#!/bin/bash
+# Ensure PATH includes homebrew
+export PATH="/opt/homebrew/bin:$PATH"
+# Right-hand sidebar listing every Claude Code agent across all tmux sessions.
+# Usage: tmux-claude-sidebar toggle|ensure [window-id]|fit|reap|hold [pane-id]|view
+#   toggle  flip the persisted on/off preference and apply it to every window
+#   ensure  add a sidebar pane to a window (every window when omitted) if enabled
+#   fit     pin sidebar panes back to their width (tmux resizes panes proportionally)
+#   reap    close windows where only sidebar panes are left
+#   hold    put an agent on hold / take it off (@claude_hold); held agents drop to a
+#           "Held" section and are skipped by the picker's "next waiting"
+#   view    the sidebar's own render loop (runs inside the sidebar pane)
+#
+# The preference lives in a state file so it survives tmux restarts. Sidebar panes are
+# tagged with the @claude_sidebar pane option; scripts that count panes filter on it.
+# State comes from the @claude_state / @claude_since options set by
+# ~/.claude/hooks/tmux-claude-state.sh, same as the picker and status bar.
+
+SELF="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+STATE_FILE="${TMUX_CLAUDE_SIDEBAR_STATE:-${XDG_STATE_HOME:-$HOME/.local/state}/tmux/claude-sidebar-enabled}"
+WIDTH="${TMUX_CLAUDE_SIDEBAR_WIDTH:-62}"
+INTERVAL=2
+TAB=$'\t'
+IS_SIDEBAR='#{==:#{@claude_sidebar},1}'
+
+enabled() { [ -f "$STATE_FILE" ]; }
+
+ensure_window() {
+    local win="$1" pane
+    [ -n "$(tmux list-panes -t "$win" -f "$IS_SIDEBAR" -F x 2>/dev/null)" ] && return
+    # -d keeps focus on the working pane, -f spans the full window height
+    pane=$(tmux split-window -d -f -h -l "$WIDTH" -t "$win" -P -F '#{pane_id}' "exec '$SELF' view") || return
+    tmux set-option -p -t "$pane" @claude_sidebar 1
+}
+
+ensure() {
+    enabled || return 0
+    if [ -n "$1" ]; then
+        ensure_window "$1"
+    else
+        tmux list-windows -a -F '#{window_id}' | while read -r w; do ensure_window "$w"; done
+    fi
+}
+
+remove_all() {
+    tmux list-panes -a -f "$IS_SIDEBAR" -F '#{pane_id}' | while read -r p; do
+        tmux kill-pane -t "$p"
+    done
+}
+
+toggle() {
+    if enabled; then
+        rm -f "$STATE_FILE"
+        remove_all
+        tmux display-message "Claude sidebar off"
+    else
+        mkdir -p "$(dirname "$STATE_FILE")" && touch "$STATE_FILE"
+        ensure
+        tmux display-message "Claude sidebar on"
+    fi
+}
+
+fit() {
+    tmux list-panes -a -f "$IS_SIDEBAR" -F '#{pane_id} #{pane_width}' \
+        | awk -v w="$WIDTH" '$2 != w {print $1}' \
+        | while read -r p; do tmux resize-pane -t "$p" -x "$WIDTH" 2>/dev/null; done
+}
+
+# A window left holding only its sidebar would linger forever
+reap() {
+    tmux list-panes -a -F '#{window_id} #{@claude_sidebar}' \
+        | awk '{n[$1]++; if ($2 == 1) s[$1]++} END {for (w in n) if (s[w] == n[w]) print w}' \
+        | while read -r w; do tmux kill-window -t "$w"; done
+}
+
+# Flat list in the picker's order (blocked, done, unknown, working, then held; oldest
+# first), so row N here is what "Ctrl+a Y N" jumps to. Rows 1-9 carry their jump number.
+# Toggle hold on an agent: the given pane if it runs claude, otherwise the first claude
+# pane in its window (so it works when focus is on the shell pane or the sidebar)
+hold() {
+    local pane="${1:-$TMUX_PANE}" target
+    target=$(tmux list-panes -t "$pane" -F '#{pane_id} #{pane_current_command}' \
+        | awk -v p="$pane" '$2 == "claude" {if (!first) first = $1; if ($1 == p) hit = $1} END {print hit ? hit : first}')
+    [ -z "$target" ] && { tmux display-message "No Claude agent in this window"; return; }
+    if [ -n "$(tmux show-options -pqv -t "$target" @claude_hold)" ]; then
+        tmux set-option -pu -t "$target" @claude_hold
+        tmux display-message "Claude agent released from hold"
+    else
+        tmux set-option -p -t "$target" @claude_hold 1
+        tmux display-message "Claude agent on hold"
+    fi
+}
+
+render() {
+    local mywin width
+    read -r mywin width < <(tmux display-message -p -t "$TMUX_PANE" '#{window_id} #{pane_width}')
+    tmux list-panes -a -F "#{session_name}${TAB}#{window_id}${TAB}#{window_name}${TAB}#{pane_current_command}${TAB}#{@claude_state}${TAB}#{@claude_since}${TAB}#{@claude_cost}${TAB}#{?@claude_hold,1,0}" \
+    | awk -F'\t' -v now="$(date +%s)" '
+        $4 != "claude" { next }
+        {
+            key = ($8 == 1) ? 4 : ($5 == "blocked") ? 0 : ($5 == "done") ? 1 : ($5 == "working") ? 3 : 2
+            since = ($5 == "") ? now : $6
+            n++; k[n] = key; t[n] = since; w[n] = $2; nm[n] = $3; st[n] = $5; se[n] = $1; co[n] = $7; hl[n] = $8
+            count[$1]++
+        }
+        END { for (i = 1; i <= n; i++) printf "%d\t%d\t%s\t%s\t%s\t%s\t%d\t%s\n", k[i], t[i], w[i], nm[i], st[i], se[i], count[se[i]], co[i] }' \
+    | sort -t"$TAB" -k1,1n -k2,2n \
+    | awk -F'\t' -v mywin="$mywin" -v width="$width" '
+        {
+            held = ($1 == 4)
+            if      (held)            { g = "\033[90m‖" }
+            else if ($5 == "blocked") { g = "\033[31m!"; b++ }
+            else if ($5 == "done")    { g = "\033[32m✓"; d++ }
+            else if ($5 == "working") { g = "\033[33m●"; wk++ }
+            else                      { g = "\033[90m?" }
+            mark = ($3 == mywin) ? "▸" : " "
+            num = (NR <= 9) ? NR : " "
+            cost = ($8 == "") ? "" : sprintf("$%.2f", $8)
+            # Cost is right-aligned: pad by the visible width of the left part (5 prefix
+            # columns), keeping one column of margin on the right
+            left = sprintf("%s \033[90m%s (%d)\033[0m", $4, $6, $7)
+            vis = 5 + length($4) + 1 + length($6) + length(sprintf(" (%d)", $7))
+            pad = width - vis - length(cost) - 1
+            if (pad < 1) pad = 1
+            row = sprintf("%s\033[90m%s\033[0m %s\033[0m %s%*s%s", mark, num, g, left, pad, "", cost)
+            if (held) hrows[++nh] = row; else rows[++n] = row
+        }
+        END {
+            hdr = "\033[1m Claude\033[0m  "
+            if (b)  hdr = hdr "\033[31m! " b " "
+            if (d)  hdr = hdr "\033[32m✓ " d " "
+            if (wk) hdr = hdr "\033[33m● " wk " "
+            print hdr "\033[0m\033[K"
+            print "\033[K"
+            if (!n && !nh) print "\033[90m no agents running\033[0m\033[K"
+            for (i = 1; i <= n; i++) print rows[i] "\033[K"
+            if (nh) {
+                print "\033[K"
+                print "\033[90m Held (" nh ")\033[0m\033[K"
+                for (i = 1; i <= nh; i++) print hrows[i] "\033[K"
+            }
+            if (n + nh) {
+                print "\033[K"
+                print "\033[90m C-a Y 1-9  jump to agent\033[0m\033[K"
+                print "\033[90m C-a y      next waiting\033[0m\033[K"
+                print "\033[90m C-a h      hold / unhold\033[0m\033[K"
+                print "\033[90m C-a A      picker\033[0m\033[K"
+            }
+        }'
+}
+
+view() {
+    [ -n "$TMUX_PANE" ] || { echo "run inside tmux" >&2; exit 1; }
+    # No line wrap (the terminal clips long names), hidden cursor
+    printf '\033[?7l\033[?25l'
+    trap 'printf "\033[?7h\033[?25h"' EXIT
+    while :; do
+        printf '\033[H%s\033[J' "$(render)"
+        sleep "$INTERVAL"
+    done
+}
+
+case "${1:-toggle}" in
+    toggle) toggle ;;
+    ensure) ensure "$2" ;;
+    fit)    fit ;;
+    reap)   reap ;;
+    hold)   hold "$2" ;;
+    view)   view ;;
+    *)      echo "usage: ${0##*/} toggle|ensure [window-id]|fit|reap|hold [pane-id]|view" >&2; exit 1 ;;
+esac
