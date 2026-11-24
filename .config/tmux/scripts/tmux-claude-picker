@@ -4,8 +4,9 @@ export PATH="/opt/homebrew/bin:$PATH"
 # Claude Code agents across all tmux sessions.
 #   (no args)  fzf picker with a live preview of the agent's pane; Enter jumps to it
 #   --nth N    jump to the Nth agent in the sidebar's order (same sort as the picker)
-#   --next     jump straight to the agent that has waited longest for you
-#              (blocked on a permission prompt first, then finished turns).
+#   --next     cycle through agents waiting on you (blocked on a permission prompt
+#              first, then finished turns, longest-waiting first), continuing from
+#              the current pane and wrapping around.
 #              Agents on hold (@claude_hold, Ctrl+a h) are skipped and sort last.
 #
 # State comes from the @claude_state / @claude_since pane options set by
@@ -60,8 +61,16 @@ jump() {
 case "${1:-}" in
     --next)
         current=$(tmux display-message -p '#{pane_id}')
-        # Only agents waiting on you (key 0 blocked, 1 done), never the pane you're on
-        pick=$(list_agents | awk -F'\t' -v cur="$current" '$1<=1 && $3!=cur {print; exit}')
+        # Round-robin over agents waiting on you (key 0 blocked, 1 done), in
+        # longest-waiting-first order. Starts after the current pane and wraps, so
+        # repeated presses visit every waiting agent instead of bouncing between two.
+        # If the current pane isn't in the list, this lands on the longest-waiting one.
+        pick=$(list_agents | awk -F'\t' -v cur="$current" '
+            $1<=1 { rows[++n]=$0; if ($3==cur) at=n }
+            END {
+                if (n==0 || (n==1 && at==1)) exit
+                print rows[(at % n) + 1]
+            }')
         if [ -z "$pick" ]; then
             tmux display-message "No other Claude agents waiting"
             exit 0
