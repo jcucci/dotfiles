@@ -28,7 +28,8 @@ macos-option-as-alt = true
 shell-integration = detect
 
 # Auto-start tmux (attach to existing or create new "main" session)
-command = /opt/homebrew/bin/tmux new-session -A -s main
+# shell: so /bin/sh can find tmux (Homebrew on macOS, /usr/bin on Linux)
+command = shell:PATH="/opt/homebrew/bin:$PATH" exec tmux new-session -A -s main
 
 # =============================================================================
 # Keybinds - Only terminal-level actions (tmux handles the rest)
