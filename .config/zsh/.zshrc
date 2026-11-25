@@ -12,12 +12,52 @@ zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-autosuggestions
 zinit light zsh-users/zsh-completions
 zinit light Aloxaf/fzf-tab
+zinit light zsh-users/zsh-history-substring-search  # must load after syntax-highlighting
+zinit light hlissner/zsh-autopair
+
+# Oh My Zsh snippets
+zinit snippet OMZL::clipboard.zsh
+zinit snippet OMZP::colored-man-pages
+zinit snippet OMZP::extract             # `extract <archive>` for any archive type
+zinit snippet OMZP::copypath            # copy current dir path to clipboard
+[[ "$OSTYPE" == linux* ]] && zinit snippet OMZP::archlinux
+
+# Completions for CLIs that generate their own. Cached in $ZDOTDIR/completions;
+# delete that directory (or a single _file) to regenerate after an upgrade.
+ZSH_COMPLETIONS_DIR="$ZDOTDIR/completions"
+mkdir -p "$ZSH_COMPLETIONS_DIR"
+_gen_completion() {  # _gen_completion <name> <command...>
+  local name=$1; shift
+  (( $+commands[$1] )) || return
+  [[ -s "$ZSH_COMPLETIONS_DIR/_$name" ]] || "$@" > "$ZSH_COMPLETIONS_DIR/_$name" 2>/dev/null
+}
+_gen_completion gh       gh completion -s zsh
+_gen_completion mise     mise completion zsh
+_gen_completion rustup   rustup completions zsh
+_gen_completion cargo    rustup completions zsh cargo
+_gen_completion docker   docker completion zsh
+_gen_completion dotnet   dotnet completions script zsh
+_gen_completion herdr    herdr completion zsh
+_gen_completion uv       uv generate-shell-completion zsh
+_gen_completion kubectl  kubectl completion zsh
+unfunction _gen_completion
+fpath=("$ZSH_COMPLETIONS_DIR" $fpath)
 
 autoload -U compinit && compinit
 
 zinit cdreplay -q
 
 bindkey -v
+export KEYTIMEOUT=1  # snappier Esc into vi normal mode
+
+# History substring search: type a prefix, then Up/Down (or k/j in normal mode)
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+bindkey '^p' history-substring-search-up
+bindkey '^n' history-substring-search-down
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down
+bindkey '^y' autosuggest-accept  # accept the grey suggestion (Right arrow also works)
 
 HISTSIZE=5000
 HISTFILE=~/.config/zsh/history
@@ -37,6 +77,12 @@ fi
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' menu no
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompcache"
+zstyle ':completion:*:descriptions' format '[%d]'           # lets fzf-tab group results
+zstyle ':completion:*:git-checkout:*' sort false
+zstyle ':fzf-tab:*' switch-group '<' '>'                     # cycle groups in fzf-tab
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 zstyle ':fzf-tab:complete:z:*' fzf-preview 'eza -la --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza -la --color $realpath'
 
@@ -55,7 +101,7 @@ export PATH=$PATH:$HOME/.local/bin
 export PATH=$PATH:$HOME/.npm-global/bin
 export NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED="true"
 # Use DOTNET_ROOT to set MSBuildSDKsPath dynamically
-export MSBuildSDKsPath=$DOTNET_ROOT/sdk/$(dotnet --version)/Sdks
+command -v dotnet &>/dev/null && export MSBuildSDKsPath=$DOTNET_ROOT/sdk/$(dotnet --version)/Sdks
 export VISUAL="nvim"
 export EDITOR="nvim"
 export XDG_DATA_DIRS="/usr/local/share:/usr/share"
@@ -109,7 +155,7 @@ ninjatestsource() {
     source_env_file "$HOME/.config/zsh/ninja-api-tests.env"
 }
 
-source_env_file $HOME/.config/zsh/dev.env
+[ -f ~/.config/zsh/dev.env ] && source_env_file $HOME/.config/zsh/dev.env
 [ -f ~/.config/zsh/azure.zsh ] && source ~/.config/zsh/azure.zsh
 [ -f ~/.config/zsh/claude.zsh ] && source ~/.config/zsh/claude.zsh
 [ -f ~/.config/zsh/dotnet.zsh ] && source ~/.config/zsh/dotnet.zsh
@@ -121,8 +167,8 @@ source_env_file $HOME/.config/zsh/dev.env
 [ -f ~/.config/zsh/android.zsh ] && source ~/.config/zsh/android.zsh
 
 eval "$(fzf --zsh)"
+command -v mise &>/dev/null && eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
-. "$HOME/.cargo/env"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
-source <(kubectl completion zsh)

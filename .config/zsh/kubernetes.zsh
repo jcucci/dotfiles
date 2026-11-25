@@ -1,4 +1,5 @@
-alias kubectl='kubecolor'
+(( $+commands[kubecolor] )) && alias kubectl='kubecolor'
+(( $+commands[kubecolor] )) && compdef kubecolor=kubectl
 alias k='kubectl'
 
 kpods() {
