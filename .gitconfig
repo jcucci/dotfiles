@@ -1,12 +1,6 @@
 [user]
 	name = Joe Cucci
 	email = jcucci@fastmail.com
-[credential "https://github.com"]
-	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
-[credential "https://gist.github.com"]
-	helper = 
-	helper = !/opt/homebrew/bin/gh auth git-credential
 [core]
     pager = delta --dark --line-numbers
 [interactive]
@@ -34,3 +28,12 @@
 	prompt = false
 [rerere]
 	enabled = true
+# Machine/work-specific settings (untracked); keep before the GitHub helpers
+[include]
+	path = ~/.gitconfig.local
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
