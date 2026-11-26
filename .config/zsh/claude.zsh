@@ -1,7 +1,12 @@
-# Route Claude Code to the right account based on the working directory.
-#   ~/projects/sharp/*  -> enterprise account (~/.claude, the default)
-#   everything else     -> personal account   (~/.claude-personal)
+# Route Claude Code to the right config dir.
+#   Linux                     -> ~/.claude (single account)
+#   macOS ~/projects/sharp/*  -> enterprise account (~/.claude, the default)
+#   macOS everything else     -> personal account   (~/.claude-personal)
 _claude_config_dir() {
+    if [[ "$OSTYPE" != darwin* ]]; then
+        print -r -- "$HOME/.claude"
+        return
+    fi
     case "$PWD/" in
         "$HOME/projects/sharp/"*) print -r -- "$HOME/.claude" ;;
         *)                        print -r -- "$HOME/.claude-personal" ;;
@@ -12,8 +17,8 @@ _claude_config_dir() {
 # works when copied alone, e.g. into Claude Code's shell snapshot; an empty
 # CLAUDE_CONFIG_DIR makes the CLI write its config into the current directory.
 claude() {
-    local config_dir="$HOME/.claude-personal"
-    [[ "$PWD/" == "$HOME/projects/sharp/"* ]] && config_dir="$HOME/.claude"
+    local config_dir="$HOME/.claude"
+    [[ "$OSTYPE" == darwin* && "$PWD/" != "$HOME/projects/sharp/"* ]] && config_dir="$HOME/.claude-personal"
     CLAUDE_CONFIG_DIR="$config_dir" command claude "$@"
 }
 
