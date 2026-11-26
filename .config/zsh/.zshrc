@@ -170,5 +170,13 @@ eval "$(fzf --zsh)"
 command -v mise &>/dev/null && eval "$(mise activate zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
+# atuin: searchable shell history on Ctrl+R (loaded after fzf so it owns Ctrl+R).
+# Up arrow stays with history-substring-search.
+if (( $+commands[atuin] )); then
+  eval "$(atuin init zsh --disable-up-arrow)"
+  bindkey -M vicmd '^R' atuin-search-vicmd  # also in vi normal mode
+fi
+# direnv: load/unload a project's .envrc on cd
+(( $+commands[direnv] )) && eval "$(direnv hook zsh)"
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
