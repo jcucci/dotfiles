@@ -128,11 +128,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/brainstall.sh"
-          },
-          {
-            "type": "command",
-            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/tmux-claude-state.sh notify"
+            "command": "f=\"$HOME/.claude/hooks/tmux-claude-state.sh\"; [ -f \"$f\" ] || exit 0; exec /bin/bash \"$f\" notify"
           }
         ]
       }
@@ -142,11 +138,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/brainstall-clear.sh"
-          },
-          {
-            "type": "command",
-            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/tmux-claude-state.sh working"
+            "command": "f=\"$HOME/.claude/hooks/tmux-claude-state.sh\"; [ -f \"$f\" ] || exit 0; exec /bin/bash \"$f\" working"
           }
         ]
       }
@@ -156,11 +148,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/brainstall-clear.sh"
-          },
-          {
-            "type": "command",
-            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/tmux-claude-state.sh working"
+            "command": "f=\"$HOME/.claude/hooks/tmux-claude-state.sh\"; [ -f \"$f\" ] || exit 0; exec /bin/bash \"$f\" working"
           }
         ]
       }
@@ -170,11 +158,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/brainstall-clear.sh"
-          },
-          {
-            "type": "command",
-            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/tmux-claude-state.sh done"
+            "command": "f=\"$HOME/.claude/hooks/tmux-claude-state.sh\"; [ -f \"$f\" ] || exit 0; exec /bin/bash \"$f\" done"
           }
         ]
       }
@@ -184,11 +168,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/brainstall-clear.sh"
-          },
-          {
-            "type": "command",
-            "command": "/bin/bash /Users/joe.cucci/.claude/hooks/tmux-claude-state.sh clear"
+            "command": "f=\"$HOME/.claude/hooks/tmux-claude-state.sh\"; [ -f \"$f\" ] || exit 0; exec /bin/bash \"$f\" clear"
           }
         ]
       }
@@ -196,7 +176,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "/bin/bash /Users/joe.cucci/.claude/statusline-command.sh"
+    "command": "f=\"$HOME/.claude/statusline-command.sh\"; [ -f \"$f\" ] || exit 0; exec /bin/bash \"$f\""
   },
   "enabledPlugins": {
     "sherlock@dotnet-sherlock-mcp": true
