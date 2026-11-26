@@ -148,20 +148,74 @@ async function worktreeToClose() {
   if (!repo?.linked) return null;
   const tabs = new Set(s.tabs.map((t) => t.id));
   const mine = panes().filter((p) => tabs.has(p.tab));
-  return { ...repo, space: s.id, terminals: mine.map((p) => p.terminal).filter(Boolean), strays: mine.filter((p) => p.cwd && !inside(p.cwd, repo.top)).length };
+  return { ...repo, spaces: [s.id], terminals: mine.map((p) => p.terminal).filter(Boolean), strays: mine.filter((p) => p.cwd && !inside(p.cwd, repo.top)).length };
 }
 
-// Refuses dirty worktrees. wt keeps unmerged branches, so commits are never lost here.
-async function removeWorktree(w) {
-  if (!w.branch) throw new Error("Detached HEAD: remove it by hand.");
-  if (w.strays) throw new Error("This space also has terminals outside the worktree; close those first.");
+// Why a worktree can't be removed, or null. Dirty ones are refused.
+async function blocker(w) {
+  if (!w.branch) return "detached HEAD: remove it by hand";
+  if (w.strays) return "its space also has terminals outside the worktree; close those first";
+  if (w.others) return "a terminal in another space is inside it";
   const dirty = await git(w.top, "status", "--porcelain");
-  if (dirty !== "") throw new Error(dirty === null ? "git status failed." : `${w.branch} has uncommitted changes; commit or discard first.`);
-  run("space.close", { id: w.space, confirmed: true });
-  for (let i = 0; i < 100 && terminals().some((t) => t.state === "live" && w.terminals.includes(t.address)); i++) await exec("sleep", ["0.1"]);
+  return dirty === null ? "git status failed" : dirty ? "uncommitted changes; commit or discard first" : null;
+}
+
+// wt keeps unmerged branches, so commits are never lost here.
+async function removeWorktree(w) {
+  const why = await blocker(w);
+  if (why) throw new Error(`${w.branch ?? w.top}: ${why}.`);
+  for (const id of w.spaces) run("space.close", { id, confirmed: true });
+  const alive = () => terminals().some((t) => t.state === "live" && w.terminals.includes(t.address));
+  for (let i = 0; i < 100 && alive(); i++) await exec("sleep", ["0.1"]);
+  if (alive()) throw new Error(`${w.branch}: its terminals haven't stopped, so the worktree was kept.`);
   const r = await exec("wt", ["-C", w.main, "remove", w.branch, "--foreground", "--yes"], { timeout: 600_000 });
-  if (r.code !== 0) throw new Error(r.stderr.slice(-400) || "wt remove failed.");
+  if (r.code !== 0) throw new Error(`${w.branch}: ${r.stderr.slice(-400) || "wt remove failed."}`);
   say(`Worktree ${w.branch} removed`, "success");
+}
+
+// The open worktrees closing this space involves: itself if it is one, else the
+// same repo's worktree spaces (what the sidebar nests under it), one per checkout.
+async function worktreesUnder(s) {
+  if (!s || s.machine) return [];
+  const all = panes();
+  const paneList = (x) => all.filter((p) => x.tabs.some((t) => t.id === p.tab));
+  const repoOf = (x) => repoAt(paneList(x).find((p) => p.cwd)?.cwd ?? x.folder);
+  const own = await repoOf(s);
+  if (!own) return [];
+  const local = spaces().filter((x) => !x.machine);
+  const found = new Map();
+  for (const x of local) {
+    const r = x.id === s.id ? own : await repoOf(x);
+    if (!r?.linked || r.main !== own.main || (own.linked && r.top !== own.top)) continue;
+    const w = found.get(r.top) ?? { ...r, spaces: [], terminals: [], strays: 0, statuses: [] };
+    const mine = paneList(x);
+    w.spaces.push(x.id);
+    w.terminals.push(...mine.map((p) => p.terminal).filter(Boolean));
+    w.strays += mine.filter((p) => p.cwd && !inside(p.cwd, r.top)).length;
+    w.statuses.push(...mine.map((p) => p.status).filter(Boolean));
+    found.set(r.top, w);
+  }
+  const list = [...found.values()];
+  for (const w of list) {
+    w.others = local.filter((x) => !w.spaces.includes(x.id)).flatMap(paneList).filter((p) => p.cwd && inside(p.cwd, w.top)).length;
+    w.why = await blocker(w);
+  }
+  return list;
+}
+
+// remove: also remove the worktrees, checked first so a blocked one stops everything.
+// Otherwise only the spaces close; C-a n or C-a N opens a kept worktree again.
+async function closeSpace(id, worktrees, remove) {
+  if (remove) {
+    for (const w of worktrees) {
+      const why = await blocker(w);
+      if (why) throw new Error(`Nothing was closed. ${w.branch ?? w.top}: ${why}.`);
+    }
+    for (const w of worktrees) await removeWorktree(w);
+  } else {
+    for (const x of worktrees.flatMap((w) => w.spaces)) if (x !== id) run("space.close", { id: x, confirmed: true });
+  }
+  if (!worktrees.some((w) => remove && w.spaces.includes(id))) run("space.close", { id, confirmed: true });
 }
 
 // Plain sh, run on each machine: projects (minus worktrunk folders), then zoxide.
@@ -261,7 +315,7 @@ const KEYS = {
   "(": ["prev space", go("space.prev")],
   ")": ["next space", go("space.next")],
   tab: ["last space", () => { const id = shared("prefix.last"); if (id) run("space.select", { id }); }],
-  X: ["close space", go("space.close")],
+  X: ["close space", "closeSpace"],
   a: ["claude tab", () => toggleApp("claude", ["claude"])],
   y: ["next waiting agent", nextWaiting],
   Y: ["agent 1-9", "agent"],
@@ -326,12 +380,19 @@ export default class Prefix extends View {
     if (this.mode === "agent") { this.close(); return /^[1-9]$/.test(k) && run("agent.select", { index: Number(k) }); }
     if (this.mode === "remove") return k === "y" ? this.work(cx, "Removing worktree…", () => removeWorktree(this.target)) : this.close();
 
+    if (this.mode === "removeAll") {
+      if (k === "y" && !this.targets.some((w) => w.why)) return this.work(cx, "Removing worktrees…", () => closeSpace(this.spaceId, this.targets, true));
+      if (k === "n") return this.work(cx, "Closing…", () => closeSpace(this.spaceId, this.targets, false));
+      return k === "y" ? undefined : this.close();
+    }
+
     const action = KEYS[k];
     if (!action) return this.close();
     const [, what, repeat] = action;
     if (what === "agent") { this.mode = "agent"; return cx.notify(); }
     if (what === "branch") return this.askBranch(cx);
     if (what === "close") return this.askClose(cx);
+    if (what === "closeSpace") return this.askCloseSpace(cx);
     if (what === "literal") return this.literal(k.replace("-", "+"));
     if (what === "dirs") return this.askDir(cx);
     if (what === "spaces") return this.askDir(cx, true);
@@ -440,6 +501,36 @@ export default class Prefix extends View {
     });
   }
 
+  askCloseSpace(cx) {
+    const s = space();
+    if (!s) return this.close();
+    this.mode = "busy"; this.error = "Checking for worktrees…"; cx.notify();
+    cx.spawn(async (cx) => {
+      try {
+        this.spaceId = s.id; this.spaceName = s.name;
+        this.targets = await worktreesUnder(s);
+        if (!this.targets.length) { this.close(); run("space.close", { id: s.id }); return; }
+        this.mode = "removeAll";
+        this.handle.focus();
+        cx.notify();
+      } catch (e) { this.fail(e, cx); }
+    });
+  }
+
+  renderRemoveAll(t, text) {
+    const blocked = this.targets.some((w) => w.why);
+    return v_flex().gap(8)
+      .child(text(`Close ${this.spaceName}: also remove ${this.targets.length === 1 ? "its worktree" : `its ${this.targets.length} worktrees`}?`))
+      .children(this.targets.slice(0, 8).map((w) => h_flex().gap(8)
+        .child(text(w.branch ?? "(detached)", t.accent))
+        .child(text(w.why ?? "clean", w.why ? t.blocked : t.muted))
+        .when(w.statuses.some((x) => x === "working" || x === "blocked"), (el) => el.child(text("agent still busy", t.working)))))
+      .when(this.targets.length > 8, (el) => el.child(text(`and ${this.targets.length - 8} more`, t.dim)))
+      .child(text(blocked ? "y  unavailable until the above is resolved" : "y  remove worktrees and close their spaces", blocked ? t.dim : t.foreground))
+      .child(text("n  close the spaces, keep the worktrees on disk"))
+      .child(text("Esc  cancel", t.dim));
+  }
+
   render() {
     const t = theme();
     const text = (s, c = t.foreground) => div().text_color(c).child(s);
@@ -452,6 +543,7 @@ export default class Prefix extends View {
     if (this.mode === "agent") return body.child(text("Agent number: 1-9"));
     if (this.mode === "busy") return body.child(text(this.error, t.muted));
     if (this.mode === "error") return body.child(text(this.error, t.blocked)).child(text("Any key closes", t.dim));
+    if (this.mode === "removeAll") return body.child(this.renderRemoveAll(t, text));
     if (this.mode === "remove") return body.child(text(`Remove worktree ${this.target.branch ?? "(detached)"} and close its space? (y/n)`));
     return body.child(h_flex().flex_wrap().children(Object.entries(KEYS).map(([k, [label]]) =>
       h_flex().w(190).h(22).gap(8).child(div().w(52).text_color(t.accent).child(k)).child(text(label, t.muted)))));
