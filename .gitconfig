@@ -10,7 +10,7 @@
 	last = log -1 HEAD
 	unstage = reset HEAD --
 [include]
-    path = /Users/joe.cucci/projects/system/catppuccin/delta/catppuccin.gitconfig
+    path = ~/projects/system/catppuccin/delta/catppuccin.gitconfig
 [delta]
     features = catppuccin-mocha
     navigate = true
