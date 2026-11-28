@@ -251,12 +251,19 @@ async function machineNames() {
   return [null, ...names].sort((a, b) => (b === here) - (a === here));
 }
 
-function spaceAt(d) {
-  const at = (s) => panes().find((p) => p.cwd && s.tabs.some((t) => t.id === p.tab))?.cwd;
-  return spaces().find((s) => {
-    const cwd = (s.machine ?? null) === d.machine && at(s);
-    return cwd && (cwd === d.path || (s.name === d.name && inside(cwd, d.path)));
-  });
+// Each space with the folder its first terminal is in. Read once per list:
+// panes() and spaces() cover every machine, so calling them per folder is too slow.
+function spaceFolders() {
+  const all = panes();
+  return spaces().map((s) => {
+    const tabs = new Set(s.tabs.map((t) => t.id));
+    return { s, cwd: all.find((p) => p.cwd && tabs.has(p.tab))?.cwd };
+  }).filter((f) => f.cwd);
+}
+
+function spaceAt(d, folders = spaceFolders()) {
+  return folders.find(({ s, cwd }) => (s.machine ?? null) === d.machine
+    && (cwd === d.path || (s.name === d.name && inside(cwd, d.path))))?.s;
 }
 
 function openDir(d) {
@@ -427,7 +434,8 @@ export default class Prefix extends View {
   rows() {
     if (!this.open) return matchDirs(this.dirs, this.query);
     const tabs = openTabs();
-    const dirs = this.only ? [] : this.dirs.filter((d) => !spaceAt(d));
+    const folders = this.only ? [] : spaceFolders();
+    const dirs = this.only ? [] : this.dirs.filter((d) => !spaceAt(d, folders));
     return matchDirs([...tabs, ...dirs], this.query);
   }
 
