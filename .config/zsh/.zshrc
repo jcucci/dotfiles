@@ -87,21 +87,23 @@ zstyle ':fzf-tab:complete:z:*' fzf-preview 'eza -la --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'eza -la --color $realpath'
 
 export ASPNETCORE_ENVIRONMENT=Development
-# Auto-detect DOTNET_ROOT based on OS
-if [ -d "/usr/local/share/dotnet" ]; then
+# DOTNET_ROOT: prefer the user-local install managed by `dnsdk` (dotnet-sdk.zsh),
+# fall back to the system install (macOS pkg, then Linux distro package).
+if [ -x "$HOME/.dotnet/dotnet" ]; then
+    export DOTNET_ROOT=$HOME/.dotnet
+elif [ -d "/usr/local/share/dotnet" ]; then
     export DOTNET_ROOT=/usr/local/share/dotnet
 elif [ -d "/usr/share/dotnet" ]; then
     export DOTNET_ROOT=/usr/share/dotnet
 fi
+# Prepend so this dotnet wins over /usr/bin/dotnet or /usr/local/bin/dotnet.
+[ -n "$DOTNET_ROOT" ] && export PATH=$DOTNET_ROOT:$PATH
 export PATH=$PATH:$HOME/.dotnet/tools
-export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
 export PATH=$PATH:$DOTNET_ROOT/azure-functions-cli
 export PATH=$PATH:$HOME/apps/hawk-4.1.0
 export PATH=$PATH:$HOME/.local/bin
 export PATH=$PATH:$HOME/.npm-global/bin
 export NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED="true"
-# Use DOTNET_ROOT to set MSBuildSDKsPath dynamically
-command -v dotnet &>/dev/null && export MSBuildSDKsPath=$DOTNET_ROOT/sdk/$(dotnet --version)/Sdks
 export VISUAL="nvim"
 export EDITOR="nvim"
 export XDG_DATA_DIRS="/usr/local/share:/usr/share"
@@ -159,6 +161,7 @@ ninjatestsource() {
 [ -f ~/.config/zsh/azure.zsh ] && source ~/.config/zsh/azure.zsh
 [ -f ~/.config/zsh/claude.zsh ] && source ~/.config/zsh/claude.zsh
 [ -f ~/.config/zsh/dotnet.zsh ] && source ~/.config/zsh/dotnet.zsh
+[ -f ~/.config/zsh/dotnet-sdk.zsh ] && source ~/.config/zsh/dotnet-sdk.zsh
 [ -f ~/.config/zsh/docker.zsh ] && source ~/.config/zsh/docker.zsh
 [ -f ~/.config/zsh/git.zsh ] && source ~/.config/zsh/git.zsh
 [ -f ~/.config/zsh/jj.zsh ] && source ~/.config/zsh/jj.zsh
